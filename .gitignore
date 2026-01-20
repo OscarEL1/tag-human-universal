@@ -1,0 +1,25 @@
+# Dependencias de Node
+node_modules/
+npm-debug.log
+
+# Variables de entorno (¡NUNCA SUBIR ESTO!)
+.env
+.env.local
+
+# Build de producción
+dist/
+build/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage testing
+coverage/

@@ -1,0 +1,12 @@
+{
+  "name": "tag-human-universal-monorepo",
+  "version": "1.0.0",
+  "description": "Monorepo para el proyecto Tag Human Universal",
+  "scripts": {
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Equipo Tag Human",
+  "license": "ISC"
+}
