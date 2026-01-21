@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Base de Datos (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: taghuman_db
+    environment:
+      POSTGRES_USER: adminBt5
+      POSTGRES_PASSWORD: junKOOK_97
+      POSTGRES_DB: taghuman_local
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # Backend (Node API)
+  backend:
+    build: ./backend
+    container_name: taghuman_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=adminBt5
+      - DB_PASS=junKOOK_97
+      - DB_NAME=taghuman_local
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # Frontend (React Vite)
+  frontend:
+    build: ./frontend
+    container_name: taghuman_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  pgdata:
