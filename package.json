@@ -5,8 +5,14 @@
   "scripts": {
     "docker:up": "docker-compose up",
     "docker:down": "docker-compose down",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
   },
   "author": "Equipo Tag Human",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "husky": "^9.1.7"
+  }
 }
