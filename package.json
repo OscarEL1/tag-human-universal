@@ -5,7 +5,7 @@
   "scripts": {
     "docker:up": "docker-compose up",
     "docker:down": "docker-compose down",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No hay tests\" && exit 0",
     "prepare": "husky"
   },
   "author": "Equipo Tag Human",

@@ -10,4 +10,4 @@ COPY . .
 EXPOSE 5173
 
 # --host 0.0.0.0 es necesario para Docker
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "dev"]
