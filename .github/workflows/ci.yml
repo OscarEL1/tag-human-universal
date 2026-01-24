@@ -1,0 +1,48 @@
+name: CI Pipeline - Tag Human Universal
+
+# 1. DISPARADORES (TRIGGERS)
+# Se activa en Pull Requests y Pushes a las ramas clave
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  validate-and-build:
+    name: Validación Integral
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Descargar el código
+      - name: Checkout del Código
+        uses: actions/checkout@v4
+
+      # Configurar Node (mejorada con Caché)
+      # Esto hace que las descargas de npm sean ultra rápidas
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          #cache: 'npm'
+          #cache-dependency-path: '**/package-lock.json'
+          # Se comentaron estas las líneas de caché temporalmente para que no marque error
+
+      # Verificar Dependencias 
+      # Si alguien subió un package.json roto, fallamos aquí rápido
+      - name: Instalar Dependencias (Test Rápido)
+        run: |
+          echo "Verificando Backend..."
+          cd backend && npm install --ignore-scripts
+          echo "Verificando Frontend..."
+          cd ../frontend && npm install --ignore-scripts
+
+      # Validar Sintaxis de Docker Compose 
+      # Verifica que no falten espacios o letras en el YAML
+      - name: Validar Syntax Docker Compose
+        run: docker compose config
+
+      # Construcción Real de Contenedores
+      # La prueba de fuego: ¿Se pueden crear los contenedores?
+      - name: Build Docker Images
+        run: docker compose build
