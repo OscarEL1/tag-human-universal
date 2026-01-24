@@ -40,9 +40,9 @@ jobs:
       # Validar Sintaxis de Docker Compose 
       # Verifica que no falten espacios o letras en el YAML
       - name: Validar Syntax Docker Compose
-        run: docker-compose config
+        run: docker compose config
 
       # Construcción Real de Contenedores
       # La prueba de fuego: ¿Se pueden crear los contenedores?
       - name: Build Docker Images
-        run: docker-compose build
+        run: docker compose build
