@@ -4,7 +4,8 @@
   "main": "index.js",
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "echo 'Contenedor Frontend Listo' && tail -f /dev/null",
+    "test": "echo \"No hay tests\" && exit 0"
   },
   "keywords": [],
   "author": "",
