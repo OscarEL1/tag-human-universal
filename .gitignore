@@ -5,7 +5,7 @@ npm-debug.log
 # Variables de entorno (¡NUNCA SUBIR ESTO!)
 .env
 .env.local
-.env.example
+
 
 # Build de producción
 dist/
