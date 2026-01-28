@@ -6,9 +6,9 @@ services:
     image: postgres:15-alpine
     container_name: taghuman_db
     environment:
-      POSTGRES_USER: adminBt5
-      POSTGRES_PASSWORD: junKOOK_97
-      POSTGRES_DB: taghuman_local
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
@@ -21,11 +21,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - PORT=3000
+      - PORT=${PORT}
+      - DB_PORT=${DB_PORT}
       - DB_HOST=db
-      - DB_USER=adminBt5
-      - DB_PASS=junKOOK_97
-      - DB_NAME=taghuman_local
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
     depends_on:
       - db
     volumes:
