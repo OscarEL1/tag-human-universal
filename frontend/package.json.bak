@@ -1,0 +1,19 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo 'Contenedor Frontend Listo' && tail -f /dev/null",
+    "test": "echo \"No hay tests\" && exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.563.0",
+    "react-router-dom": "^7.13.0",
+    "tailwind-merge": "^3.4.0"
+  }
+}
