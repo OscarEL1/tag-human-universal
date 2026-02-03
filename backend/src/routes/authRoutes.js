@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const { register, login } = require('../controllers/authController');
+const auth = require('../middlewares/authMiddleware'); // <--- AÑADIR ESTO ARRIBA
 
 // Middleware para revisar errores de validación
 const validarCampos = (req, res, next) => {
@@ -35,4 +36,20 @@ router.post('/login', [
   validarCampos
 ], login);
 
+// --- RUTA PROTEGIDA DE PRUEBA: GET /api/auth/me ---
+// Esta ruta devuelve los datos del usuario SOLO si manda el token correcto
+router.get('/me', auth, async (req, res) => {
+  try {
+    // Buscamos al usuario en la BD usando el ID que venía en el token
+    // Nota: req.user.id viene del middleware que acabamos de hacer
+    const pool = require('../config/db'); // Importación rápida para el ejemplo
+    
+    const user = await pool.query('SELECT id, nombre, phone, role FROM users WHERE id = $1', [req.user.id]);
+    
+    res.json(user.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error del servidor');
+  }
+});
 module.exports = router;
