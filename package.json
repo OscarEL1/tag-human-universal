@@ -14,5 +14,10 @@
     "@commitlint/cli": "^20.3.1",
     "@commitlint/config-conventional": "^20.3.1",
     "husky": "^9.1.7"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express-validator": "^7.3.1",
+    "jsonwebtoken": "^9.0.3"
   }
 }
