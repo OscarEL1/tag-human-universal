@@ -28,3 +28,19 @@ CREATE TABLE IF NOT EXISTS access_logs (
     qr_code_data TEXT, 
     scanned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- -----------------------------------------------------
+-- 4. Tabla RESIDENTIAL ZONES (Multitenant)
+-- -----------------------------------------------------
+CREATE TABLE residential_zones (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    ubicacion TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------
+-- 5. ACTUALIZACIÓN: Relación Users -> Zones
+-- -----------------------------------------------------
+ALTER TABLE users ADD COLUMN zone_id INT;
+ALTER TABLE users ADD CONSTRAINT fk_zone FOREIGN KEY (zone_id) REFERENCES residential_zones(id) ON DELETE SET NULL;
