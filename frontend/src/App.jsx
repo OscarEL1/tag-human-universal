@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 
 // Importaciones de Pantallas
 import LoginScreen from './pages/login/LoginScreen';
@@ -8,93 +8,91 @@ import RegisterStep2 from './pages/register/RegisterStep2';
 import GuardScanner from './pages/guard/GuardScanner';
 import GuardValidation from './pages/guard/GuardValidation';
 import DriverDashboard from './pages/driver/DriverDashboard';
-import AdminDashboard from './pages/admin/AdminDashboard'; // <--- Nueva Importación
+import AdminDashboard from './pages/admin/AdminDashboard';
 import Error404 from './pages/errors/Error404';
+
+// COMPONENTE GUARDÍAN: Control de acceso por roles
+const ProtectedRoute = ({ children, allowedRoles }) => {
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  if (!token || !user) return <Navigate to="/" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
+  
+  return children;
+};
 
 function AppContent() {
   const navigate = useNavigate();
 
-  // ESTADO DINÁMICO: Registro de conductor y datos de sesión
   const [userData, setUserData] = useState({
     nombre: '',
+    phone: '',
+    password: '',
     plates: '',
-    role: 'driver', // Por defecto para el registro público
-    zoneId: null
+    role: 'driver'
   });
 
   const [scannedDriver, setScannedDriver] = useState(null);
 
   const handleRegisterStep1 = (data) => {
-    setUserData({ ...userData, ...data });
+    // Actualizamos el estado con los datos del formulario (nombre, phone, password, plates)
+    setUserData((prev) => ({ ...prev, ...data }));
     navigate('/register/step2');
   };
 
-  const handleFinishRegister = () => {
-    navigate('/app/qr');
-  };
-
-  const handleScanResult = (result) => {
-    setScannedDriver(result);
-    navigate('/guard/validate');
-  };
-
   const handleLogout = () => {
-    setUserData({ nombre: '', plates: '', role: 'driver', zoneId: null });
+    localStorage.clear(); // Limpiamos token y sesión
+    setUserData({ nombre: '', phone: '', password: '', plates: '', role: 'driver' });
     navigate('/');
   };
 
   return (
     <Routes>
-      {/* 1. Login Centralizado: Redirige según rol */}
-      <Route path="/" element={
-        <LoginScreen onNavigateToRegister={() => navigate('/register')} />
-      } />
+      <Route path="/" element={<LoginScreen onNavigateToRegister={() => navigate('/register')} />} />
 
-      {/* 2. Registro Público: Solo para Drivers */}
+      {/* FLUJO DE REGISTRO ASÍNCRONO */}
       <Route path="/register" element={
-        <RegisterStep1
-          onNext={handleRegisterStep1}
-          onBack={() => navigate('/')}
-          initialData={userData}
-        />
+        <RegisterStep1 onNext={handleRegisterStep1} onBack={() => navigate('/')} initialData={userData} />
       } />
 
       <Route path="/register/step2" element={
-        <RegisterStep2
-          onBack={() => navigate('/register')}
-          onFinish={handleFinishRegister}
+        <RegisterStep2 
+          userData={userData} // <--- ¡ESTO FALTABA! Ahora el Step 2 tiene los datos para el fetch
+          onBack={() => navigate('/register')} 
+          onFinish={() => navigate('/app/qr')} 
         />
       } />
 
-      {/* 3. Panel de Administrador (Nuevo) */}
+      {/* PANELES PROTEGIDOS */}
       <Route path="/admin/dashboard" element={
-        <AdminDashboard onLogout={handleLogout} />
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminDashboard onLogout={handleLogout} />
+        </ProtectedRoute>
       } />
 
-      {/* 4. Vistas de Usuario / Repartidor */}
       <Route path="/app/qr" element={
-        <DriverDashboard
-          licensePlate={userData.plates || "ABC-1234"}
-          driverName={userData.nombre || "Usuario"}
-          onLogout={handleLogout}
-        />
+        <ProtectedRoute allowedRoles={['driver']}>
+          <DriverDashboard onLogout={handleLogout} />
+        </ProtectedRoute>
       } />
 
-      {/* 5. Vistas de Seguridad / Guardia */}
+      {/* VISTAS DE GUARDIA */}
       <Route path="/guard/scanner" element={
-        <GuardScanner onScanResult={handleScanResult} /> 
+        <ProtectedRoute allowedRoles={['guard', 'admin']}>
+          <GuardScanner onScanResult={(res) => { setScannedDriver(res); navigate('/guard/validate'); }} />
+        </ProtectedRoute>
       } />
 
       <Route path="/guard/validate" element={
-        <GuardValidation 
-          driverData={scannedDriver || {}} 
-          onAuthorize={(house) => {
-            alert(`Acceso registrado: Casa ${house}`);
-            navigate('/guard/scanner');
-          }}
-          onReject={() => navigate('/guard/scanner')}
-          onBack={() => navigate('/guard/scanner')}
-        />
+        <ProtectedRoute allowedRoles={['guard', 'admin']}>
+          <GuardValidation 
+            driverData={scannedDriver || {}} 
+            onAuthorize={() => navigate('/guard/scanner')}
+            onReject={() => navigate('/guard/scanner')}
+            onBack={() => navigate('/guard/scanner')}
+          />
+        </ProtectedRoute>
       } />
 
       <Route path="*" element={<Error404 />} />

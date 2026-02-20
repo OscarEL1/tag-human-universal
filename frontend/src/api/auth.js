@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:5173/api"; // Ajusta a la IP de tu servidor Docker
+const API_URL = "http://localhost:3000/api"; // Ajusta a la IP de tu servidor Docker
 
 export const loginUser = async (credentials) => {
   try {
