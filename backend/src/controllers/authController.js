@@ -2,27 +2,29 @@ const pool = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// --- SECRETOS ---
-// Es vital que JWT_SECRET esté definido en .env para producción.
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_dev_only';
 
-// 1. REGISTRO (Solo para Drivers públicos)
 const register = async (req, res) => {
-    // Extraemos datos. Note que 'role' y 'zone_id' se definen internamente por seguridad.
-    const { nombre, phone, password, plates } = req.body;
+    // 1. Extraemos datos y definimos valores por defecto
+    const { nombre, phone, password, plates, role, zone_id } = req.body;
+    
+    // Si no viene un rol (registro público), por defecto es 'driver'
+    const finalRole = role || 'driver';
+    // Si es registro público de conductor, la zona es NULL inicialmente
+    const finalZone = zone_id || null;
 
-    // Validación básica de entrada
+    // 2. Validación básica de presencia
     if (!nombre || !phone || !password) {
-        return res.status(400).json({ msg: 'Por favor complete todos los campos requeridos (nombre, teléfono, contraseña).' });
+        return res.status(400).json({ msg: 'Faltan campos obligatorios (nombre, teléfono, contraseña).' });
     }
 
-    // Validación específica para conductores
-    if (!plates) {
-        return res.status(400).json({ msg: 'Las placas son obligatorias para el registro de conductores.' });
+    // 3. Validación CONDICIONAL de placas: Solo obligatorias si es CONDUCTOR
+    if (finalRole === 'driver' && !plates) {
+        return res.status(400).json({ msg: 'Las placas son obligatorias para conductores.' });
     }
 
     try {
-        // A. Verificar existencia del usuario (Evitar duplicados)
+        // A. Verificar si el teléfono ya existe
         const userExist = await pool.query('SELECT id FROM users WHERE phone = $1', [phone]);
         if (userExist.rows.length > 0) {
             return res.status(400).json({ msg: 'El usuario ya está registrado con este teléfono.' });
@@ -32,35 +34,26 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        // LÓGICA MULTITENANT & ROLES:
-        // Al ser un endpoint público, forzamos el rol 'driver' y zone_id NULL.
-        // Esto previene que alguien se registre arbitrariamente como admin.
-        const role = 'driver';
-        const assignedZone = null;
-
-        // C. Insertar en BD
+        // C. Insertar en BD (Soporta Multitenant: guarda el zone_id si viene del Admin)
         const newUser = await pool.query(
-            `INSERT INTO users (nombre, phone, password_hash, role, plates, secret_totp, zone_id) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
-       RETURNING id, nombre, role, zone_id`,
-            [nombre, phone, passwordHash, role, plates, null, assignedZone]
+            `INSERT INTO users (nombre, phone, password_hash, role, plates, zone_id) 
+             VALUES ($1, $2, $3, $4, $5, $6) 
+             RETURNING id, nombre, role, zone_id`,
+            [nombre, phone, passwordHash, finalRole, (finalRole === 'driver' ? plates : null), finalZone]
         );
 
         const user = newUser.rows[0];
 
-        // D. Generar Token (Incluyendo zone_id)
+        // D. Generar Token (Mantiene la sesión activa tras el registro)
         const token = jwt.sign(
-            {
-                id: user.id,
-                role: user.role,
-                zone_id: user.zone_id
-            },
+            { id: user.id, role: user.role, zone_id: user.zone_id },
             JWT_SECRET,
             { expiresIn: '8h' }
         );
 
+        // E. Respuesta única y clara
         res.status(201).json({
-            msg: 'Conductor registrado exitosamente',
+            msg: `${finalRole === 'guard' ? 'Guardia' : 'Conductor'} registrado exitosamente`,
             token,
             user
         });
@@ -71,7 +64,6 @@ const register = async (req, res) => {
     }
 };
 
-// 2. LOGIN (Para Todos: Guardias, Drivers, Admins)
 const login = async (req, res) => {
     const { phone, password } = req.body;
 
@@ -80,7 +72,6 @@ const login = async (req, res) => {
     }
 
     try {
-        // A. Buscar usuario
         const userResult = await pool.query('SELECT * FROM users WHERE phone = $1', [phone]);
 
         if (userResult.rows.length === 0) {
@@ -89,21 +80,13 @@ const login = async (req, res) => {
 
         const user = userResult.rows[0];
 
-        // B. Validar Password
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
             return res.status(400).json({ msg: 'Credenciales inválidas' });
         }
 
-        // C. Generar Token
-        // IMPORTANTE: Incluimos zone_id en el payload del token.
-        // Esto permite al Frontend validar permisos de zona sin hacer peticiones extra.
         const token = jwt.sign(
-            {
-                id: user.id,
-                role: user.role,
-                zone_id: user.zone_id
-            },
+            { id: user.id, role: user.role, zone_id: user.zone_id },
             JWT_SECRET,
             { expiresIn: '8h' }
         );

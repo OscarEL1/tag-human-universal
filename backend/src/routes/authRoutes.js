@@ -23,8 +23,8 @@ router.post('/register', [
   // Validamos solo si el rol es 'driver'. Formato flexible (Letras y Números)
   check('plates')
     .if((value, { req }) => req.body.role === 'driver')
-    .matches(/^[A-Z0-9-]{6,10}$/i)
-    .withMessage('Formato de placas inválido (Solo letras, números y guiones)'),
+    .not().isEmpty().withMessage('Las placas son obigatorias para conductores')
+    .matches(/^[A-Z0-9-]{5,10}$/i).withMessage('Formato de placas inválido (Solo letras, números y guiones)'),
   
   validarCampos
 ], register);
