@@ -1,13 +1,14 @@
-FROM node:22-alpine
-
+# Etapa 1: Construcción (Build)
+FROM node:22-alpine as builder
 WORKDIR /app
-
 COPY package*.json ./
 RUN npm install
-
 COPY . .
+RUN npm run build
 
-EXPOSE 5173
-
-# --host 0.0.0.0 es necesario para Docker
-CMD ["npm", "run", "dev"]
+# Etapa 2: Servidor Web (Nginx)
+FROM nginx:alpine
+# Copiamos la carpeta 'dist' generada por Vite a la carpeta pública de Nginx
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 8080:80
+CMD ["nginx", "-g", "daemon off;"]
