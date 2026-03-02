@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, RefreshCw, ShieldCheck } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; // Asegúrate de instalarlo: npm install qrcode.react
 
+const INITIAL_QR_TIMESTAMP = Date.now();
+
 const DriverDashboard = ({ onLogout }) => {
   const [timeLeft, setTimeLeft] = useState(30);
   const logoutBtnRef = useRef(null);
@@ -27,7 +29,7 @@ const DriverDashboard = ({ onLogout }) => {
   const qrValue = JSON.stringify({
     id: user.id,
     plates: user.plates,
-    timestamp: Date.now()
+    timestamp: INITIAL_QR_TIMESTAMP,
   });
 
   return (
@@ -49,7 +51,7 @@ const DriverDashboard = ({ onLogout }) => {
 
       <main className="flex-1 flex flex-col items-center justify-center">
         {/* CONTENEDOR DE QR REAL */}
-        <div className="relative p-6 bg-white rounded-[2.5rem] shadow-[0_0_50px_rgba(0,82,204,0.4)] transition-transform hover:scale-105">
+        <div className="relative p-6 bg-white rounded-[2.5rem] shadow-[0_0_50px_rgba(0,82,204,0.4)] transition-transform hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100">
           <div className="p-4 bg-white rounded-2xl border-2 border-gray-100">
             {/* Usamos QRCodeSVG para generar el QR con los datos del usuario */}
             <QRCodeSVG 
@@ -65,7 +67,7 @@ const DriverDashboard = ({ onLogout }) => {
             role="timer"
             aria-live="polite"
           >
-            <RefreshCw className={`w-4 h-4 ${timeLeft < 5 ? 'animate-spin text-orange-300' : 'text-white'}`} />
+            <RefreshCw className={`w-4 h-4 ${timeLeft < 5 ? 'animate-spin motion-reduce:animate-none text-orange-300' : 'text-white'}`} />
             <span className="font-mono font-black text-xs tracking-wider">EXPIRA EN {timeLeft}S</span>
           </div>
         </div>

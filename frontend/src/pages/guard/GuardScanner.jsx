@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Camera, LogIn, LogOut, Loader2, ShieldCheck } from 'lucide-react';
 
 const GuardScanner = ({ onScanResult }) => {
@@ -65,10 +65,10 @@ const GuardScanner = ({ onScanResult }) => {
         {isScanning ? (
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
-              <Loader2 className="w-16 h-16 text-blue-500 animate-spin" />
-              <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+              <Loader2 className="w-16 h-16 text-blue-500 animate-spin motion-reduce:animate-none" />
+              <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full motion-reduce:animate-none"></div>
             </div>
-            <p className="text-white font-black text-xs tracking-widest uppercase animate-pulse">Leyendo QR...</p>
+            <p className="text-white font-black text-xs tracking-widest uppercase animate-pulse motion-reduce:animate-none">Leyendo QR...</p>
           </div>
         ) : (
           <>
@@ -98,6 +98,11 @@ const GuardScanner = ({ onScanResult }) => {
         }
         .animate-scan-line {
           animation: scan-line 1.5s infinite alternate ease-in-out;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-scan-line {
+            animation: none;
+          }
         }
       `}</style>
     </div>

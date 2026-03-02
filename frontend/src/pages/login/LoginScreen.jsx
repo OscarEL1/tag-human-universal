@@ -64,7 +64,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
           {serverError && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded flex items-center gap-3" role="alert">
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded flex items-center gap-3 animate-in fade-in motion-reduce:animate-none" role="alert">
               <AlertCircle className="text-red-500 shrink-0" />
               <p className="text-red-700 text-sm font-medium">{serverError}</p>
             </div>

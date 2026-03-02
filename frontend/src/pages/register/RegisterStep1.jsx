@@ -50,7 +50,7 @@ const RegisterStep1 = ({ onNext, onBack, initialData }) => {
           <span>50%</span>
         </div>
         <div className="w-full h-2 bg-gray-100 rounded-full">
-          <div className="w-1/2 h-full bg-[#0052CC] rounded-full transition-all duration-500" />
+          <div className="w-1/2 h-full bg-[#0052CC] rounded-full transition-all duration-500 motion-reduce:transition-none" />
         </div>
       </div>
 

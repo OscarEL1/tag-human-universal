@@ -80,7 +80,7 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
 
         {/* Error de Red Accesible */}
         {error && (
-          <div className="w-full mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg flex items-center gap-3 animate-in fade-in" role="alert">
+          <div className="w-full mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg flex items-center gap-3 animate-in fade-in motion-reduce:animate-none" role="alert">
             <AlertCircle size={20} />
             <p className="text-sm font-bold">{error}</p>
           </div>
@@ -92,9 +92,9 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
             ${captured ? 'border-green-500 bg-green-50' : 'border-dashed border-gray-200 bg-gray-50'}`}
         >
           {loading ? (
-            <Loader2 className="w-12 h-12 text-[#0052CC] animate-spin" />
+            <Loader2 className="w-12 h-12 text-[#0052CC] animate-spin motion-reduce:animate-none" />
           ) : captured ? (
-            <Check className="w-20 h-20 text-green-500 animate-bounce" />
+            <Check className="w-20 h-20 text-green-500 animate-bounce motion-reduce:animate-none" />
           ) : (
             <Camera className="w-16 h-16 text-gray-300" />
           )}
