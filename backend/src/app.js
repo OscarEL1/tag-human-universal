@@ -4,6 +4,7 @@ const helmet = require('helmet');
 
 // Importar tus rutas (Asegúrate de que la ruta relativa sea correcta)
 const authRoutes = require('./routes/authRoutes'); 
+const auditoriaRoutes = require('./routes/auditoriaRoutes');
 
 const app = express();
 
@@ -14,7 +15,7 @@ app.use(express.json()); // Entender JSON
 
 // --- 2. Rutas del API ---
 app.use('/api/auth', authRoutes); // Conecta /register y /login aquí
-
+app.use('/api/auditoria', auditoriaRoutes); // Conecta /registrar aquí
 // --- 3. Health Check (Opcional) ---
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', msg: 'API Tag Human funcionando 🚀' });

@@ -52,6 +52,20 @@ async function seed() {
             console.log(`✅ Guardia creado: ${userRes.rows[0].nombre} (Password: ${password})`);
         }
 
+        // 3. Crear Residente de prueba para "Casa 101"
+        const residentPhone = '5551234567'; // Número al que llegaría la notificación
+        const checkResident = await pool.query("SELECT id FROM residents WHERE telefono = $1", [residentPhone]);
+
+        if (checkResident.rows.length > 0) {
+            console.log(`ℹ️ El residente con teléfono ${residentPhone} ya existe.`);
+        } else {
+            const resiRes = await pool.query(
+                "INSERT INTO residents (nombre, direccion, telefono) VALUES ($1, $2, $3) RETURNING id",
+                ['Familia García', 'Casa 101', residentPhone]
+            );
+            console.log(`✅ Residente creado: ${resiRes.rows[0].id} - Casa 101`);
+        }
+
     } catch (err) {
         console.error('❌ Error al sembrar datos:', err);
     } finally {
