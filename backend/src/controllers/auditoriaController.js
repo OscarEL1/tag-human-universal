@@ -1,36 +1,42 @@
 const pool = require('../config/db');
 
 const registrarLog = async (req, res) => {
-    // 1. Usamos los nombres que tus compañeros ya definieron en la DB
-    // En lugar de quien_entra, usaremos qr_code_data para guardar el nombre por ahora
     const { quien_entra, quien_autoriza, destino } = req.body;
 
-    if (!quien_entra || !destino) {
-        return res.status(400).json({ msg: 'Faltan campos obligatorios.' });
-    }
-
     try {
-        // 2. Ajustamos la consulta SQL a las columnas REALES de tu tabla access_logs
-        const query = `
+        // 1. BUSCAR EL TELÉFONO DEL RESIDENTE SEGÚN EL DESTINO (Casa 101)
+        const residentQuery = 'SELECT nombre, telefono FROM residents WHERE direccion = $1 LIMIT 1';
+        const residentResult = await pool.query(residentQuery, [destino]);
+
+        let mensajeNotificacion = `No se encontró residente para el destino: ${destino}`;
+        let telefonoDestino = null;
+
+        if (residentResult.rows.length > 0) {
+            const residente = residentResult.rows[0];
+            telefonoDestino = residente.telefono;
+            mensajeNotificacion = `📱 NOTIFICACIÓN ENVIADA A ${residente.nombre} (${telefonoDestino}): Se ha autorizado el ingreso de ${quien_entra}.`;
+        }
+
+        // 2. GUARDAR EL LOG (Integridad de datos)
+        const insertQuery = `
             INSERT INTO access_logs (qr_code_data, status, scanned_at)
             VALUES ($1, 'allowed', CURRENT_TIMESTAMP)
-            RETURNING *;
+            RETURNING id;
         `;
-        
-        // Guardamos el nombre del visitante en qr_code_data como prueba
-        const nuevoLog = await pool.query(query, [quien_entra]);
+        await pool.query(insertQuery, [quien_entra]);
 
-        // 3. Simulación de notificación
-        console.log(`📱 NOTIFICACIÓN: ${quien_entra} va hacia ${destino}. Autorizado por: ${quien_autoriza}`);
+        // 3. MOSTRAR RESULTADO EN CONSOLA
+        console.log(mensajeNotificacion);
 
         res.status(201).json({
-            msg: "Log de auditoría registrado exitosamente",
-            data: nuevoLog.rows[0]
+            msg: "Auditoría registrada",
+            notificacion: mensajeNotificacion,
+            telefono: telefonoDestino
         });
 
     } catch (error) {
-        console.error('Error al registrar auditoría en la BD:', error);
-        res.status(500).json({ msg: 'Error interno al registrar el log' });
+        console.error('Error:', error);
+        res.status(500).json({ msg: 'Error interno' });
     }
 };
 
