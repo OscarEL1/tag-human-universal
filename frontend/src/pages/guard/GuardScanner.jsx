@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Camera, LogIn, LogOut, Loader2, ShieldCheck } from 'lucide-react';
 
 const GuardScanner = ({ onScanResult }) => {
   const [mode, setMode] = useState('entry');
   const [isScanning, setIsScanning] = useState(false);
-  
+
   // Recuperamos datos del guardia logueado (Persistencia)
   const guardData = JSON.parse(localStorage.getItem('user')) || { nombre: 'Guardia' };
 
   const simulateScan = () => {
     setIsScanning(true);
-    
+
     // Simulamos que el escáner leyó el código QR que generamos en el DriverDashboard
     setTimeout(() => {
       setIsScanning(false);
-      
+
       // En un caso real, aquí usaríamos una librería como 'html5-qrcode'
       // para decodificar el valor del QR del conductor.
-      onScanResult({ 
+      onScanResult({
         plate: '93TLY5', // <--- Ahora usamos tu placa real de Tehuacán
         name: 'Conductor Registrado',
         mode: mode,
@@ -42,20 +42,18 @@ const GuardScanner = ({ onScanResult }) => {
       <div className="grid grid-cols-2 gap-4 mb-8" role="radiogroup" aria-label="Modo de escaneo">
         <button
           onClick={() => setMode('entry')}
-          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${
-            mode === 'entry' ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200' : 'bg-white border-gray-100 text-gray-400'
-          }`}
+          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'entry' ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200' : 'bg-white border-gray-100 text-gray-400'
+            }`}
         >
-          <LogIn className="w-6 h-6" /> 
+          <LogIn className="w-6 h-6" />
           <span className="text-[10px] uppercase tracking-widest">Entrada</span>
         </button>
         <button
           onClick={() => setMode('exit')}
-          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${
-            mode === 'exit' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-gray-100 text-gray-400'
-          }`}
+          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'exit' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-gray-100 text-gray-400'
+            }`}
         >
-          <LogOut className="w-6 h-6" /> 
+          <LogOut className="w-6 h-6" />
           <span className="text-[10px] uppercase tracking-widest">Salida</span>
         </button>
       </div>
@@ -76,7 +74,7 @@ const GuardScanner = ({ onScanResult }) => {
             <Camera className="w-20 h-20 text-white opacity-10" />
           </>
         )}
-        
+
         {/* Línea de escaneo láser (Efecto visual) */}
         {isScanning && (
           <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan-line"></div>
