@@ -17,6 +17,12 @@ export const loginUser = async (credentials) => {
 
     return data; // Contiene token y user {id, nombre, role}
   } catch (error) {
-    throw error;
+    console.error('Error crítico en loginUser API:', error);
+
+    // Si el error ya es una instancia de Error, lo propagamos con su mensaje original
+    // Si es un error de red o fetch (TypeError), mostramos un mensaje amigable
+    throw new Error(
+      error.message || 'Error de conexión de red o el servidor no responde'
+    );
   }
 };
