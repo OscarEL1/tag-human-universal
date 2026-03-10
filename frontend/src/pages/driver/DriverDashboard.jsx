@@ -5,7 +5,7 @@ import { QRCodeSVG } from 'qrcode.react'; // Asegúrate de instalarlo: npm insta
 const DriverDashboard = ({ onLogout }) => {
   const [timeLeft, setTimeLeft] = useState(30);
   const logoutBtnRef = useRef(null);
-  
+
   // 1. RECUPERACIÓN DE DATOS REALES (Persistencia)
   // Obtenemos los datos que guardamos en el login o registro
   const user = JSON.parse(localStorage.getItem('user')) || { nombre: 'Conductor', plates: 'S/N' };
@@ -14,20 +14,24 @@ const DriverDashboard = ({ onLogout }) => {
     logoutBtnRef.current?.focus();
   }, []);
 
+  // Agregamos un estado para el timestamp y evitar la función impura en el renderizado
+  const [timestamp, setTimestamp] = useState(() => Date.now());
+
   // 2. LÓGICA DE QR DINÁMICO (Seguridad)
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev <= 1 ? 30 : prev - 1));
+      setTimestamp(Date.now()); // Se actualiza el timestamp de forma pura en el ciclo
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
   // 3. GENERACIÓN DE CONTENIDO PARA EL QR
-  // El QR contiene datos reales para que el guardia los valide en la BD
+  // Usamos el timestamp del estado de React, no la llamada directa a la función
   const qrValue = JSON.stringify({
     id: user.id,
     plates: user.plates,
-    timestamp: Date.now()
+    timestamp: timestamp
   });
 
   return (
@@ -52,15 +56,15 @@ const DriverDashboard = ({ onLogout }) => {
         <div className="relative p-6 bg-white rounded-[2.5rem] shadow-[0_0_50px_rgba(0,82,204,0.4)] transition-transform hover:scale-105">
           <div className="p-4 bg-white rounded-2xl border-2 border-gray-100">
             {/* Usamos QRCodeSVG para generar el QR con los datos del usuario */}
-            <QRCodeSVG 
-              value={qrValue} 
+            <QRCodeSVG
+              value={qrValue}
               size={220}
               level="H" // Alta corrección de errores para escaneos rápidos
               includeMargin={false}
             />
           </div>
-          
-          <div 
+
+          <div
             className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-[#0052CC] px-5 py-2.5 rounded-full flex items-center gap-3 border-4 border-[#1A1A1A] shadow-lg"
             role="timer"
             aria-live="polite"
