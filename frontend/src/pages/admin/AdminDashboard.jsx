@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { UserPlus, ShieldCheck, Users, LogOut, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { UserPlus, ShieldCheck, Users, LogOut, AlertCircle, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { mockUsers, USERS_PAGE_SIZE } from '../../data/mockUsers';
+import { ingresosPorHora } from '../../data/mockIngresos';
+import IngresosChart from '../../components/admin/IngresosChart';
 
 // 1. Esquema de validación con Zod (Garantiza calidad de datos en la DB)
 const guardSchema = z.object({
@@ -16,6 +19,13 @@ const guardSchema = z.object({
 
 const AdminDashboard = ({ onLogout }) => {
   const [serverMessage, setServerMessage] = useState({ type: '', msg: '' });
+  // Paginación simulada tabla usuarios (10 filas fijas; controles anterior/siguiente)
+  const [usersPage, setUsersPage] = useState(0);
+  const totalUsersPages = Math.max(1, Math.ceil(mockUsers.length / USERS_PAGE_SIZE));
+  const paginatedUsers = mockUsers.slice(
+    usersPage * USERS_PAGE_SIZE,
+    (usersPage + 1) * USERS_PAGE_SIZE
+  );
   
   // Recuperamos los datos del Admin logueado desde el LocalStorage
   const adminData = JSON.parse(localStorage.getItem('user')) || { nombre: 'Admin', zone_id: null };
@@ -186,6 +196,74 @@ const AdminDashboard = ({ onLogout }) => {
             </button>
           </form>
         </section>
+
+        {/* Tabla de usuarios registrados (accesible: table, thead, th scope="col", paginación por teclado) */}
+        <section
+          className="bg-white p-6 rounded-[2.5rem] shadow-2xl border border-gray-100 mt-8"
+          role="region"
+          aria-labelledby="titulo-usuarios"
+        >
+          <h2 id="titulo-usuarios" className="text-xl font-bold text-gray-800 mb-4">
+            Usuarios registrados
+          </h2>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[600px] border-collapse text-left">
+              <thead>
+                <tr>
+                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">ID</th>
+                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Nombre</th>
+                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Email</th>
+                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Fecha de registro</th>
+                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedUsers.map((user) => (
+                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50/50">
+                    <td className="p-3 text-gray-800 font-medium">{user.id}</td>
+                    <td className="p-3 text-gray-800">{user.nombre}</td>
+                    <td className="p-3 text-gray-600">{user.email}</td>
+                    <td className="p-3 text-gray-600">{user.fechaRegistro}</td>
+                    <td className="p-3">
+                      <span className={user.estado === 'Activo' ? 'text-green-600 font-semibold' : 'text-gray-500'}>
+                        {user.estado}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Controles de paginación: accesibles por teclado (Tab, Enter/Espacio), foco visible */}
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+            <span className="text-sm text-gray-500" aria-live="polite">
+              Página {usersPage + 1} de {totalUsersPages}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setUsersPage((p) => Math.max(0, p - 1))}
+                disabled={usersPage === 0}
+                className="inline-flex items-center gap-1 px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
+                aria-label="Página anterior"
+              >
+                <ChevronLeft className="w-5 h-5" aria-hidden /> Anterior
+              </button>
+              <button
+                type="button"
+                onClick={() => setUsersPage((p) => Math.min(totalUsersPages - 1, p + 1))}
+                disabled={usersPage >= totalUsersPages - 1}
+                className="inline-flex items-center gap-1 px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-gray-700 font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
+                aria-label="Página siguiente"
+              >
+                Siguiente <ChevronRight className="w-5 h-5" aria-hidden />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Gráfica simple de ingresos (mock) + alternativa textual (sr-only) */}
+        <IngresosChart data={ingresosPorHora} title="Ingresos por hora (simulado)" />
       </main>
     </div>
   );
