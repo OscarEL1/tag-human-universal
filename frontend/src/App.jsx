@@ -10,6 +10,8 @@ import GuardValidation from './pages/guard/GuardValidation';
 import DriverDashboard from './pages/driver/DriverDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Error404 from './pages/errors/Error404';
+import DecisionAcceso from './pages/acceso/DecisionAcceso';
+import Navbar from './components/shared/Navbar';
 
 // COMPONENTE GUARDÍAN: Control de acceso por roles
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -51,6 +53,9 @@ function AppContent() {
     <Routes>
       <Route path="/" element={<LoginScreen onNavigateToRegister={() => navigate('/register')} />} />
 
+      {/* Ruta temporal: Decisión de Acceso (repartidor/placas/autorizar) */}
+      <Route path="/acceso" element={<DecisionAcceso />} />
+
       {/* FLUJO DE REGISTRO ASÍNCRONO */}
       <Route path="/register" element={
         <RegisterStep1 onNext={handleRegisterStep1} onBack={() => navigate('/')} initialData={userData} />
@@ -70,6 +75,9 @@ function AppContent() {
           <AdminDashboard onLogout={handleLogout} />
         </ProtectedRoute>
       } />
+
+      {/* Redirección /admin -> /admin/dashboard */}
+      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 
       <Route path="/app/qr" element={
         <ProtectedRoute allowedRoles={['driver']}>
@@ -104,6 +112,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-[#1A1A1A]">
+        <Navbar />
         <AppContent />
       </div>
     </BrowserRouter>

@@ -9,8 +9,9 @@ const Navbar = () => {
           Tag Human Universal
         </Link>
         <div className="space-x-4">
-          <Link to="/" className="hover:text-blue-400 transition-colors">Inicio</Link>
-          <Link to="/register" className="hover:text-blue-400 transition-colors">Registro</Link>
+          <Link to="/" className="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded">Inicio</Link>
+          <Link to="/register" className="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded">Registro</Link>
+          <Link to="/acceso" className="hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 rounded">Acceso</Link>
         </div>
       </div>
     </nav>
