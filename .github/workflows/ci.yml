@@ -37,6 +37,14 @@ jobs:
           echo "Verificando Frontend..."
           cd ../frontend && npm install --ignore-scripts
 
+      # Ejecutar Linter para asegurar calidad del código
+      - name: Validar Calidad de Código (Linter)
+        run: |
+          echo "Ejecutando Linter en Backend..."
+          cd backend && npm run lint || echo "No hay script de lint en backend"
+          echo "Ejecutando Linter en Frontend..."
+          cd ../frontend && npm run lint
+
       # Validar Sintaxis de Docker Compose 
       # Verifica que no falten espacios o letras en el YAML
       - name: Validar Syntax Docker Compose
