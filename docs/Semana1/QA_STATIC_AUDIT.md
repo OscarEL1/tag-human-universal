@@ -35,3 +35,17 @@
 ---
 **CONCLUSIÓN DEL QA:**
 "Se requieren cambios en la pantalla de registro y en la pantalla de validación"
+
+## C. Estándares de Accesibilidad y Resiliencia (WAI-ARIA)
+
+Para que el desarrollo del proyecto "Tag Human Universal" sea aprobado, debe cumplir:
+
+1. **Manejo Profesional de Errores:**
+   - Errores 404 y 500 deben incluir un botón de "Volver" o "Reintentar".
+   - Explicar qué pasó y cómo solucionarlo sin usar lenguaje técnico complejo.
+
+2. **Mensajes Accesibles (aria-live):**
+   - **Prioridad Baja (Éxitos):** Usar `aria-live="polite"` para confirmaciones de guardado.
+   - **Prioridad Alta (Errores):** Usar `aria-live="assertive"` para fallos de conexión o seguridad.
+   - **Contexto:** Todo mensaje debe incluir `aria-atomic="true"` para que el lector de pantalla lea el aviso completo.
+

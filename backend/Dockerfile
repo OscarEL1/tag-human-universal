@@ -13,4 +13,4 @@ COPY . .
 EXPOSE 3000
 
 # Comando por defecto (usaremos nodemon luego)
-CMD ["npm", "run", "dev"]
+CMD ["node", "index.js"]
