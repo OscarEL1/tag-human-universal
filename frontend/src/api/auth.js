@@ -1,7 +1,7 @@
-// Vite detectará automáticamente el entorno y usará la URL correcta
-const API_URL = import.meta.env.PROD 
-  ? "https://tag-human-backend.onrender.com/api" 
-  : "http://localhost:3000/api";
+export const API_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.PROD
+      ? "https://tag-human-backend.onrender.com/api"
+      : "http://localhost:3000/api");
 
 export const loginUser = async (credentials) => {
   try {
@@ -29,3 +29,4 @@ export const loginUser = async (credentials) => {
     );
   }
 };
+
