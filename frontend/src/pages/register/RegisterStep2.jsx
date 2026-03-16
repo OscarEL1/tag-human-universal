@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Check, ArrowLeft, RefreshCcw, Loader2, AlertCircle } from 'lucide-react';
+import { API_URL } from '../../api/auth';
 
 const RegisterStep2 = ({ onBack, onFinish, userData }) => {
   const [captured, setCaptured] = useState(false);
@@ -29,7 +30,7 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
       role: 'driver'
     };
 
-    const response = await fetch("http://localhost:3000/api/auth/register", {
+    const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
