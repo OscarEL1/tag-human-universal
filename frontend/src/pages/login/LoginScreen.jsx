@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { Shield, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
 
 const loginSchema = z.object({
   phone: z.string()
@@ -16,6 +17,7 @@ const loginSchema = z.object({
 
 const LoginScreen = ({ onNavigateToRegister }) => {
   const navigate = useNavigate();
+  const { completeLogin } = useAuth();
   const [serverError, setServerError] = useState(null);
   
   const {
@@ -35,8 +37,11 @@ const LoginScreen = ({ onNavigateToRegister }) => {
     setServerError(null);
     try {
       const result = await loginUser(data);
-      localStorage.setItem('token', result.token);
-      localStorage.setItem('user', JSON.stringify(result.user));
+      completeLogin({
+        accessToken: result.accessToken || result.token,
+        refreshToken: result.refreshToken,
+        user: result.user,
+      });
 
       if (result.user.role === 'admin') {
         navigate('/admin/dashboard');
@@ -105,6 +110,16 @@ const LoginScreen = ({ onNavigateToRegister }) => {
           <div className="text-center mt-4 border-t pt-4">
             <span className="text-gray-500 text-sm">¿No tienes cuenta? </span>
             <button type="button" onClick={onNavigateToRegister} className="text-[#0052CC] text-sm font-bold hover:underline">Registro</button>
+          </div>
+
+          <div className="text-center mt-3">
+            <button
+              type="button"
+              onClick={() => navigate('/recover-password')}
+              className="text-[#0052CC] text-sm font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
           </div>
         </form>
       </div>
