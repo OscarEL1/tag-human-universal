@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, RefreshCw, ShieldCheck } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; // Asegúrate de instalarlo: npm install qrcode.react
+import { useAuth } from '../../context/AuthContext';
 
 const DriverDashboard = ({ onLogout }) => {
+  const { user: authUser } = useAuth();
   const [timeLeft, setTimeLeft] = useState(30);
   const logoutBtnRef = useRef(null);
 
-  // 1. RECUPERACIÓN DE DATOS REALES (Persistencia)
-  // Obtenemos los datos que guardamos en el login o registro
-  const user = JSON.parse(localStorage.getItem('user')) || { nombre: 'Conductor', plates: 'S/N' };
+  const user = authUser
+    ? { ...authUser, plates: authUser.plates || 'S/N' }
+    : { nombre: 'Conductor', plates: 'S/N', id: null };
 
   useEffect(() => {
     logoutBtnRef.current?.focus();

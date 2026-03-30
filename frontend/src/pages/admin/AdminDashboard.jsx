@@ -6,6 +6,8 @@ import { UserPlus, ShieldCheck, Users, LogOut, AlertCircle, Loader2, CheckCircle
 import { mockUsers, USERS_PAGE_SIZE } from '../../data/mockUsers';
 import { ingresosPorHora } from '../../data/mockIngresos';
 import IngresosChart from '../../components/admin/IngresosChart';
+import { API_URL } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
 
 // 1. Esquema de validación con Zod (Garantiza calidad de datos en la DB)
 const guardSchema = z.object({
@@ -18,6 +20,7 @@ const guardSchema = z.object({
 });
 
 const AdminDashboard = ({ onLogout }) => {
+  const { user: adminData } = useAuth();
   const [serverMessage, setServerMessage] = useState({ type: '', msg: '' });
   // Paginación simulada tabla usuarios (10 filas fijas; controles anterior/siguiente)
   const [usersPage, setUsersPage] = useState(0);
@@ -27,8 +30,7 @@ const AdminDashboard = ({ onLogout }) => {
     (usersPage + 1) * USERS_PAGE_SIZE
   );
   
-  // Recuperamos los datos del Admin logueado desde el LocalStorage
-  const adminData = JSON.parse(localStorage.getItem('user')) || { nombre: 'Admin', zone_id: null };
+  const adminProfile = adminData || { nombre: 'Admin', zone_id: null };
 
   const {
     register,
@@ -53,11 +55,11 @@ const AdminDashboard = ({ onLogout }) => {
     const payload = {
       ...data,
       role: 'guard',
-      zone_id: adminData.zone_id // El guardia pertenece a la misma zona que el Admin
+      zone_id: adminProfile.zone_id // El guardia pertenece a la misma zona que el Admin
     };
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -87,7 +89,7 @@ const AdminDashboard = ({ onLogout }) => {
             </div>
             <div>
               <h1 className="text-xl font-bold leading-none">Panel de Control</h1>
-              <p className="text-blue-100 text-xs mt-1">Admin: {adminData.nombre}</p>
+              <p className="text-blue-100 text-xs mt-1">Admin: {adminProfile.nombre}</p>
             </div>
           </div>
           <button 
@@ -103,7 +105,7 @@ const AdminDashboard = ({ onLogout }) => {
           <p className="text-blue-200 text-[10px] uppercase font-black tracking-widest mb-1">Zona Residencial Activa</p>
           <div className="flex justify-between items-end">
             <p className="text-lg font-bold">Fraccionamiento Bosques</p>
-            <span className="text-[10px] bg-green-400 text-green-900 px-2 py-0.5 rounded-full font-bold">ID: {adminData.zone_id || '0'}</span>
+            <span className="text-[10px] bg-green-400 text-green-900 px-2 py-0.5 rounded-full font-bold">ID: {adminProfile.zone_id || '0'}</span>
           </div>
         </div>
       </header>

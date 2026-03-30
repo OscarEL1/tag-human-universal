@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Camera, LogIn, LogOut, Loader2, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const GuardScanner = ({ onScanResult }) => {
+  const { user: guardData } = useAuth();
   const [mode, setMode] = useState('entry');
   const [isScanning, setIsScanning] = useState(false);
 
-  // Recuperamos datos del guardia logueado (Persistencia)
-  const guardData = JSON.parse(localStorage.getItem('user')) || { nombre: 'Guardia' };
+  const guardProfile = guardData || { nombre: 'Guardia' };
 
   const simulateScan = () => {
     setIsScanning(true);
@@ -21,7 +22,7 @@ const GuardScanner = ({ onScanResult }) => {
         plate: '93TLY5', // <--- Ahora usamos tu placa real de Tehuacán
         name: 'Conductor Registrado',
         mode: mode,
-        guardId: guardData.id // Pasamos quién escaneó para la auditoría
+        guardId: guardProfile.id // Pasamos quién escaneó para la auditoría
       });
     }, 2000);
   };
@@ -31,7 +32,7 @@ const GuardScanner = ({ onScanResult }) => {
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-black leading-none">Escáner</h1>
-          <p className="text-gray-500 text-xs mt-1">Puesto: {guardData.nombre}</p>
+          <p className="text-gray-500 text-xs mt-1">Puesto: {guardProfile.nombre}</p>
         </div>
         <div className="bg-green-100 p-2 rounded-lg">
           <ShieldCheck className="text-green-600 w-5 h-5" />
