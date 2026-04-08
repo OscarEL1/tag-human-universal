@@ -15,6 +15,7 @@ import Navbar from './components/shared/Navbar';
 import RecoverPasswordScreen from './pages/auth/RecoverPasswordScreen';
 import ResetPasswordScreen from './pages/auth/ResetPasswordScreen';
 import { AuthProvider } from './context/AuthContext';
+import PWAInstallPrompt from './components/shared/PWAInstallPrompt';
 
 // COMPONENTE GUARDÍAN: Control de acceso por roles
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -122,6 +123,7 @@ export default function App() {
         <div className="min-h-screen bg-[#1A1A1A]">
           <Navbar />
           <AppContent />
+          <PWAInstallPrompt />
         </div>
       </AuthProvider>
     </BrowserRouter>
