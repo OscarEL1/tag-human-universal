@@ -19,10 +19,10 @@ const GuardScanner = ({ onScanResult }) => {
       // En un caso real, aquí usaríamos una librería como 'html5-qrcode'
       // para decodificar el valor del QR del conductor.
       onScanResult({
-        plate: '93TLY5', // <--- Ahora usamos tu placa real de Tehuacán
+        plate: '93TLY5',
         name: 'Conductor Registrado',
         mode: mode,
-        guardId: guardProfile.id // Pasamos quién escaneó para la auditoría
+        guardId: guardData?.id ?? null,
       });
     }, 2000);
   };

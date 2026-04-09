@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
-const { register, login } = require('../controllers/authController');
+const { register, login, getUsers } = require('../controllers/authController');
 const { refresh, logout, logoutAll, sessions, revokeOne } = require('../controllers/sessionController');
 const { recover, resetPassword } = require('../controllers/recoveryController');
 const {
@@ -43,6 +43,7 @@ router.post('/refresh', refresh);
 router.post('/logout', auth, logout);
 router.post('/logout-all', auth, logoutAll);
 router.get('/sessions', auth, sessions);
+router.get('/users', auth, getUsers);
 router.delete('/sessions/:sessionId', auth, revokeOne);
 
 router.post('/recover', [
