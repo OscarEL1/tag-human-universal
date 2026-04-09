@@ -56,7 +56,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
       <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-2xl">
         {/* CABECERA RESTAURADA */}
         <div className="flex flex-col items-center mb-8">
@@ -83,7 +83,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
               id="phone"
               type="tel"
               placeholder="10 dígitos"
-              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC]'}`}
+              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC] focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-1'}`}
             />
             {errors.phone && <p className="text-red-600 text-xs font-medium">{errors.phone.message}</p>}
           </div>
@@ -94,7 +94,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
               {...register("password")}
               id="password"
               type="password"
-              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.password ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC]'}`}
+              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.password ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC] focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-1'}`}
             />
             {errors.password && <p className="text-red-600 text-xs font-medium">{errors.password.message}</p>}
           </div>
@@ -123,7 +123,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
           </div>
         </form>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -148,9 +148,10 @@ const AdminDashboard = ({ onLogout }) => {
             )}
 
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Nombre Completo</label>
-              <input 
+              <label htmlFor="guard-name" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Nombre Completo</label>
+              <input
                 {...register("nombre")}
+                id="guard-name"
                 placeholder="Nombre del guardia"
                 className={`w-full h-14 px-5 rounded-2xl border-2 transition-all outline-none text-black font-semibold
                   ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-50 focus:border-blue-600 bg-gray-50'}`}
@@ -160,9 +161,10 @@ const AdminDashboard = ({ onLogout }) => {
 
             <div className="grid grid-cols-1 gap-5">
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Teléfono / Usuario</label>
-                <input 
+                <label htmlFor="guard-phone" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Teléfono / Usuario</label>
+                <input
                   {...register("phone")}
+                  id="guard-phone"
                   type="tel"
                   inputMode="numeric"
                   placeholder="10 dígitos"
@@ -173,9 +175,10 @@ const AdminDashboard = ({ onLogout }) => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Contraseña de Acceso</label>
-                <input 
+                <label htmlFor="guard-password" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Contraseña de Acceso</label>
+                <input
                   {...register("password")}
+                  id="guard-password"
                   type="password"
                   placeholder="Mínimo 6 caracteres"
                   className={`w-full h-14 px-5 rounded-2xl border-2 transition-all outline-none text-black font-semibold

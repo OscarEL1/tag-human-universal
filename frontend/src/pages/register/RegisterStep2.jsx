@@ -63,9 +63,9 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 flex flex-col">
+    <main className="min-h-screen bg-white px-6 py-8 flex flex-col">
       <header className="flex items-center mb-8">
-        <button onClick={onBack} disabled={loading} className="p-2 -ml-2 hover:bg-gray-100 rounded-full">
+        <button onClick={onBack} disabled={loading} aria-label="Volver al paso anterior" className="p-2 -ml-2 hover:bg-gray-100 rounded-full">
           <ArrowLeft className="w-6 h-6 text-black" />
         </button>
         <h1 className="ml-4 text-2xl font-bold text-black">Identidad</h1>
@@ -116,6 +116,7 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
             setTimeout(() => { setCaptured(true); setLoading(false); }, 1000);
           }}
           disabled={loading}
+          aria-label={captured ? 'Recapturar foto de perfil' : 'Capturar foto de perfil'}
           className={`mt-10 p-6 rounded-full transition-all outline-none focus:ring-4 shadow-lg active:scale-90
             ${captured ? 'bg-gray-100 text-gray-500' : 'bg-[#0052CC] text-white hover:bg-blue-700 focus:ring-blue-200'}`}
         >
@@ -138,7 +139,7 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
           "FINALIZAR REGISTRO"
         )}
       </button>
-    </div>
+    </main>
   );
 };
 

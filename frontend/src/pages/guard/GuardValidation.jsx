@@ -24,9 +24,9 @@ const GuardValidation = ({ driverData, onAuthorize, onReject, onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 flex flex-col">
+    <main className="min-h-screen bg-white px-6 py-8 flex flex-col">
       <header className="flex items-center mb-6">
-        <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-[#0052CC]">
+        <button onClick={onBack} aria-label="Volver al scanner" className="p-2 -ml-2 hover:bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-[#0052CC]">
           <ArrowLeft className="w-6 h-6 text-black" />
         </button>
         <h1 className="ml-4 text-2xl font-bold text-black">
@@ -104,7 +104,7 @@ const GuardValidation = ({ driverData, onAuthorize, onReject, onBack }) => {
           </button>
         </div>
       </form>
-    </div>
+    </main>
   );
 };
 

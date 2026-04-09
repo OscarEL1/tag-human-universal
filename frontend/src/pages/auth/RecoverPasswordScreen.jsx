@@ -45,7 +45,7 @@ export default function RecoverPasswordScreen() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
+    <main className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
       <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-2xl">
         <button
           type="button"
@@ -110,6 +110,6 @@ export default function RecoverPasswordScreen() {
           </div>
         </form>
       </div>
-    </div>
+    </main>
   );
 }
