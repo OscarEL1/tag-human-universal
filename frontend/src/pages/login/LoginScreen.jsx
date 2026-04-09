@@ -6,6 +6,7 @@ import { Shield, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
 
 const loginSchema = z.object({
   phone: z.string()
@@ -56,6 +57,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
       <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-2xl">
         {/* CABECERA RESTAURADA */}
@@ -124,6 +126,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
         </form>
       </div>
     </div>
+    </PageTransition>
   );
 };
 

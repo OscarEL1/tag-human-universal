@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PageTransition from '../../components/shared/PageTransition';
 
 const Error500 = () => {
   return (
+    <PageTransition>
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
       <h1 className="text-6xl font-bold text-red-600 mb-4">500</h1>
       <h2 className="text-2xl font-semibold mb-2">Error de Servidor</h2>
@@ -24,6 +26,7 @@ const Error500 = () => {
         </Link>
       </div>
     </div>
+    </PageTransition>
   );
 };
 

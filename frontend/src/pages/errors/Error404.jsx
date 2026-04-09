@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PageTransition from '../../components/shared/PageTransition';
 
 const Error404 = () => {
   return (
+    <PageTransition>
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
       <h1 className="text-6xl font-bold text-gray-800 mb-4">404</h1>
       <p className="text-xl text-gray-600 mb-8" aria-live="polite">
@@ -15,6 +17,7 @@ const Error404 = () => {
         Volver al Inicio
       </Link>
     </div>
+    </PageTransition>
   );
 };
 
