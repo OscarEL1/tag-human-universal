@@ -18,6 +18,7 @@ import { AuthProvider } from './context/AuthContext';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import Error500 from './pages/errors/Error500';
 import ErrorOffline from './pages/errors/ErrorOffline';
+import PWAInstallPrompt from './components/shared/PWAInstallPrompt';
 
 // COMPONENTE GUARDÍAN: Control de acceso por roles
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -139,6 +140,7 @@ export default function App() {
           <div className="min-h-screen bg-[#1A1A1A]">
             <Navbar />
             <AppContent />
+            <PWAInstallPrompt />
           </div>
         </ErrorBoundary>
       </AuthProvider>
