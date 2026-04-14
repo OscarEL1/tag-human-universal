@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Check, ArrowLeft, RefreshCcw, Loader2, AlertCircle } from 'lucide-react';
 import { API_URL } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
 
 const RegisterStep2 = ({ onBack, onFinish, userData }) => {
   const { completeLogin } = useAuth();
@@ -63,6 +64,7 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
   };
 
   return (
+    <PageTransition>
     <main className="min-h-screen bg-white px-6 py-8 flex flex-col">
       <header className="flex items-center mb-8">
         <button onClick={onBack} disabled={loading} aria-label="Volver al paso anterior" className="p-2 -ml-2 hover:bg-gray-100 rounded-full">
@@ -140,6 +142,7 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
         )}
       </button>
     </main>
+    </PageTransition>
   );
 };
 

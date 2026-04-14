@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { CheckCircle, XCircle, Home, ArrowLeft, User, LogOut } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import PageTransition from '../../components/shared/PageTransition';
 
 const GuardValidation = ({ driverData, onAuthorize, onReject, onBack }) => {
   const houseInputRef = useRef(null);
@@ -24,6 +25,7 @@ const GuardValidation = ({ driverData, onAuthorize, onReject, onBack }) => {
   };
 
   return (
+    <PageTransition>
     <main className="min-h-screen bg-white px-6 py-8 flex flex-col">
       <header className="flex items-center mb-6">
         <button onClick={onBack} aria-label="Volver al scanner" className="p-2 -ml-2 hover:bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-[#0052CC]">
@@ -105,6 +107,7 @@ const GuardValidation = ({ driverData, onAuthorize, onReject, onBack }) => {
         </div>
       </form>
     </main>
+    </PageTransition>
   );
 };
 
