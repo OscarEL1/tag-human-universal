@@ -8,6 +8,8 @@ import { ingresosPorHora } from '../../data/mockIngresos';
 import IngresosChart from '../../components/admin/IngresosChart';
 import { API_URL } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
+import SkeletonLoader from '../../components/shared/SkeletonLoader';
+import PageTransition from '../../components/shared/PageTransition';
 
 // 1. Esquema de validación con Zod (Garantiza calidad de datos en la DB)
 const guardSchema = z.object({
@@ -22,6 +24,7 @@ const guardSchema = z.object({
 const AdminDashboard = ({ onLogout }) => {
   const { user: adminData } = useAuth();
   const [serverMessage, setServerMessage] = useState({ type: '', msg: '' });
+  const [tableLoading, setTableLoading] = useState(true);
   // Paginación simulada tabla usuarios (10 filas fijas; controles anterior/siguiente)
   const [usersPage, setUsersPage] = useState(0);
   const totalUsersPages = Math.max(1, Math.ceil(mockUsers.length / USERS_PAGE_SIZE));
@@ -41,6 +44,12 @@ const AdminDashboard = ({ onLogout }) => {
   } = useForm({
     resolver: zodResolver(guardSchema)
   });
+
+  // Simula carga inicial de la tabla (datos reales llegarían aquí de un fetch)
+  useEffect(() => {
+    const t = setTimeout(() => setTableLoading(false), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   // Gestión de Foco: Event-driven UI para agilizar el registro
   useEffect(() => {
@@ -79,6 +88,7 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header con información de la Zona */}
       <header className="bg-[#0052CC] text-white p-6 rounded-b-[2.5rem] shadow-xl">
@@ -212,6 +222,9 @@ const AdminDashboard = ({ onLogout }) => {
             Usuarios registrados
           </h2>
           <div className="overflow-x-auto">
+            {tableLoading ? (
+              <SkeletonLoader variant="table" className="min-w-[600px]" />
+            ) : (
             <table className="w-full min-w-[600px] border-collapse text-left">
               <thead>
                 <tr>
@@ -238,6 +251,7 @@ const AdminDashboard = ({ onLogout }) => {
                 ))}
               </tbody>
             </table>
+            )}
           </div>
           {/* Controles de paginación: accesibles por teclado (Tab, Enter/Espacio), foco visible */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
@@ -271,6 +285,7 @@ const AdminDashboard = ({ onLogout }) => {
         <IngresosChart data={ingresosPorHora} title="Ingresos por hora (simulado)" />
       </main>
     </div>
+    </PageTransition>
   );
 };
 
