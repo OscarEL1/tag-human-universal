@@ -8,6 +8,7 @@ import IngresosChart from '../../components/admin/IngresosChart';
 import SkeletonLoader from '../../components/shared/SkeletonLoader';
 import { API_URL } from '../../api/auth';
 import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
 
 const PAGE_SIZE = 5;
 
@@ -26,6 +27,8 @@ const AdminDashboard = ({ onLogout }) => {
   const [serverMessage, setServerMessage] = useState({ type: '', msg: '' });
   const [users, setUsers] = useState([]);
   const [usersTotal, setUsersTotal] = useState(0);
+  const [tableLoading, setTableLoading] = useState(true);
+  // Paginación simulada tabla usuarios (10 filas fijas; controles anterior/siguiente)
   const [usersPage, setUsersPage] = useState(0);
   const [usersLoading, setUsersLoading] = useState(true);
   const totalUsersPages = Math.max(1, Math.ceil(usersTotal / PAGE_SIZE));
@@ -41,6 +44,12 @@ const AdminDashboard = ({ onLogout }) => {
   } = useForm({
     resolver: zodResolver(guardSchema)
   });
+
+  // Simula carga inicial de la tabla (datos reales llegarían aquí de un fetch)
+  useEffect(() => {
+    const t = setTimeout(() => setTableLoading(false), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   // Gestión de Foco: Event-driven UI para agilizar el registro
   useEffect(() => {
@@ -103,6 +112,7 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header con información de la Zona */}
       <header className="bg-[#0052CC] text-white p-6 rounded-b-[2.5rem] shadow-xl">
@@ -172,9 +182,10 @@ const AdminDashboard = ({ onLogout }) => {
             )}
 
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Nombre Completo</label>
-              <input 
+              <label htmlFor="guard-name" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Nombre Completo</label>
+              <input
                 {...register("nombre")}
+                id="guard-name"
                 placeholder="Nombre del guardia"
                 className={`w-full h-14 px-5 rounded-2xl border-2 transition-all outline-none text-black font-semibold
                   ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-50 focus:border-blue-600 bg-gray-50'}`}
@@ -184,9 +195,10 @@ const AdminDashboard = ({ onLogout }) => {
 
             <div className="grid grid-cols-1 gap-5">
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Teléfono / Usuario</label>
-                <input 
+                <label htmlFor="guard-phone" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Teléfono / Usuario</label>
+                <input
                   {...register("phone")}
+                  id="guard-phone"
                   type="tel"
                   inputMode="numeric"
                   placeholder="10 dígitos"
@@ -197,9 +209,10 @@ const AdminDashboard = ({ onLogout }) => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Contraseña de Acceso</label>
-                <input 
+                <label htmlFor="guard-password" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Contraseña de Acceso</label>
+                <input
                   {...register("password")}
+                  id="guard-password"
                   type="password"
                   placeholder="Mínimo 6 caracteres"
                   className={`w-full h-14 px-5 rounded-2xl border-2 transition-all outline-none text-black font-semibold
@@ -306,6 +319,7 @@ const AdminDashboard = ({ onLogout }) => {
         <IngresosChart data={ingresosPorHora} title="Ingresos por hora (simulado)" />
       </main>
     </div>
+    </PageTransition>
   );
 };
 

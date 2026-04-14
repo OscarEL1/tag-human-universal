@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '../../components/ui/Button';
+import React, { useState } from 'react';
+import { Button } from '../../components/ui/Button';
 import { User, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { API_URL } from '../../api/auth';
+import PageTransition from '../../components/shared/PageTransition';
 
 /**
  * Pantalla "Decisión de Acceso"
@@ -48,6 +51,7 @@ const DecisionAcceso = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-[#1A1A1A] text-white px-6 py-8 flex flex-col">
       <main className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center" role="main" aria-labelledby="titulo-acceso">
         <h1 id="titulo-acceso" className="text-2xl font-bold text-center mb-8">
@@ -109,6 +113,7 @@ const DecisionAcceso = () => {
         </Button>
       </main>
     </div>
+    </PageTransition>
   );
 };
 

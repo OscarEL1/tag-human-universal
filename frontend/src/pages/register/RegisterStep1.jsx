@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { ArrowLeft, ChevronRight, AlertCircle, User, Car, Smartphone, Lock } from 'lucide-react';
+import PageTransition from '../../components/shared/PageTransition';
 
 // Esquema robusto: Validamos todo antes del paso final
 const step1Schema = z.object({
@@ -36,9 +37,10 @@ const RegisterStep1 = ({ onNext, onBack, initialData }) => {
   }, [setFocus]);
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 flex flex-col">
+    <PageTransition>
+    <main className="min-h-screen bg-white px-6 py-8 flex flex-col">
       <header className="flex items-center mb-6">
-        <button onClick={onBack} className="p-2 -ml-2 hover:bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-[#0052CC]">
+        <button onClick={onBack} aria-label="Volver al inicio" className="p-2 -ml-2 hover:bg-gray-100 rounded-full outline-none focus:ring-2 focus:ring-[#0052CC]">
           <ArrowLeft className="w-6 h-6 text-black" />
         </button>
         <h1 className="ml-4 text-2xl font-bold text-black">Datos Personales</h1>
@@ -123,7 +125,8 @@ const RegisterStep1 = ({ onNext, onBack, initialData }) => {
           Continuar <ChevronRight size={20} />
         </button>
       </form>
-    </div>
+    </main>
+    </PageTransition>
   );
 };
 

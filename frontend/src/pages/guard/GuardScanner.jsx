@@ -1,20 +1,26 @@
 import React, { useState } from 'react';
 import { Camera, LogIn, LogOut, Loader2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
 
 const GuardScanner = ({ onScanResult }) => {
   const { user: guardData } = useAuth();
   const [mode, setMode] = useState('entry');
   const [isScanning, setIsScanning] = useState(false);
+  const [scanFlash, setScanFlash] = useState(null); // null | 'success' | 'error'
 
   const guardProfile = guardData || { nombre: 'Guardia' };
 
   const simulateScan = () => {
     setIsScanning(true);
 
-    // Simulamos que el escáner leyó el código QR que generamos en el DriverDashboard
     setTimeout(() => {
       setIsScanning(false);
+
+      // Flash visual de éxito + vibración corta
+      setScanFlash('success');
+      if ('vibrate' in navigator) navigator.vibrate(200);
+      setTimeout(() => setScanFlash(null), 600);
 
       // En un caso real, aquí usaríamos una librería como 'html5-qrcode'
       // para decodificar el valor del QR del conductor.
@@ -28,7 +34,8 @@ const GuardScanner = ({ onScanResult }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-8 flex flex-col">
+    <PageTransition>
+    <main className="min-h-screen bg-gray-50 px-6 py-8 flex flex-col">
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-black leading-none">Escáner</h1>
@@ -43,6 +50,8 @@ const GuardScanner = ({ onScanResult }) => {
       <div className="grid grid-cols-2 gap-4 mb-8" role="radiogroup" aria-label="Modo de escaneo">
         <button
           onClick={() => setMode('entry')}
+          role="radio"
+          aria-checked={mode === 'entry'}
           className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'entry' ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200' : 'bg-white border-gray-100 text-gray-400'
             }`}
         >
@@ -51,6 +60,8 @@ const GuardScanner = ({ onScanResult }) => {
         </button>
         <button
           onClick={() => setMode('exit')}
+          role="radio"
+          aria-checked={mode === 'exit'}
           className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'exit' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-gray-100 text-gray-400'
             }`}
         >
@@ -80,6 +91,16 @@ const GuardScanner = ({ onScanResult }) => {
         {isScanning && (
           <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan-line"></div>
         )}
+
+        {/* Flash de resultado: verde=éxito, rojo=error */}
+        {scanFlash && (
+          <div
+            aria-hidden="true"
+            className={`absolute inset-0 rounded-[2rem] pointer-events-none transition-opacity duration-300 ${
+              scanFlash === 'success' ? 'bg-green-500 opacity-40' : 'bg-red-500 opacity-40'
+            }`}
+          />
+        )}
       </div>
 
       <button
@@ -99,7 +120,8 @@ const GuardScanner = ({ onScanResult }) => {
           animation: scan-line 1.5s infinite alternate ease-in-out;
         }
       `}</style>
-    </div>
+    </main>
+    </PageTransition>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { LogOut, RefreshCw, ShieldCheck } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react'; // Asegúrate de instalarlo: npm install qrcode.react
 import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
 
 const DriverDashboard = ({ onLogout }) => {
   const { user: authUser } = useAuth();
@@ -37,6 +38,7 @@ const DriverDashboard = ({ onLogout }) => {
   });
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-[#1A1A1A] text-white px-6 py-8 flex flex-col">
       <header className="flex justify-between items-center mb-10">
         <div>
@@ -93,6 +95,7 @@ const DriverDashboard = ({ onLogout }) => {
         <span>Seguridad Cifrada • Tag Human 2026</span>
       </footer>
     </div>
+    </PageTransition>
   );
 };
 

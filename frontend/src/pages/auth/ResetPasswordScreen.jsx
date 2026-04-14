@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { resetPassword } from '../../services/authService';
+import PageTransition from '../../components/shared/PageTransition';
 
 function sanitizePhoneInput(value) {
   return value.replace(/\D/g, '').slice(0, 10);
@@ -70,7 +71,9 @@ export default function ResetPasswordScreen() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
+
+    <PageTransition>
+    <main className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
       <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-2xl">
         <button
           type="button"
@@ -109,7 +112,7 @@ export default function ResetPasswordScreen() {
               maxLength={10}
               value={phone}
               onChange={(e) => setPhone(sanitizePhoneInput(e.target.value))}
-              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] outline-none text-black"
+              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] text-black"
             />
           </div>
 
@@ -121,7 +124,7 @@ export default function ResetPasswordScreen() {
               autoComplete="one-time-code"
               value={token}
               onChange={(e) => setToken(e.target.value.trim())}
-              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] outline-none text-black"
+              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] text-black"
             />
           </div>
 
@@ -133,7 +136,7 @@ export default function ResetPasswordScreen() {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] outline-none text-black"
+              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] text-black"
             />
           </div>
 
@@ -145,7 +148,7 @@ export default function ResetPasswordScreen() {
               autoComplete="new-password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] outline-none text-black"
+              className="w-full h-11 px-4 rounded-lg border-2 border-gray-100 bg-gray-50 focus:border-[#0052CC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1A1A] text-black"
             />
           </div>
 
@@ -165,6 +168,7 @@ export default function ResetPasswordScreen() {
           </div>
         </form>
       </div>
-    </div>
+    </main>
+    </PageTransition>
   );
 }
