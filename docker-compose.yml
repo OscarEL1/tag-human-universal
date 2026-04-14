@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-  # Base de Datos (PostgreSQL)
   db:
     image: postgres:15-alpine
     container_name: taghuman_db
@@ -15,7 +12,6 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
 
-  # Backend (Node API)
   backend:
     build: ./backend
     container_name: taghuman_backend
@@ -26,17 +22,22 @@ services:
       - DB_PORT=${DB_PORT}
       - DB_HOST=db
       - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_PASS=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=${NODE_ENV:-production}
     depends_on:
       - db
     volumes:
       - ./backend:/app
       - /app/node_modules
 
-  # Frontend (React Vite)
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3000/api
     container_name: taghuman_frontend
     ports:
       - "8080:80"

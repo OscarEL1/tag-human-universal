@@ -44,3 +44,52 @@ CREATE TABLE residential_zones (
 -- -----------------------------------------------------
 ALTER TABLE users ADD COLUMN zone_id INT;
 ALTER TABLE users ADD CONSTRAINT fk_zone FOREIGN KEY (zone_id) REFERENCES residential_zones(id) ON DELETE SET NULL;
+
+-- Sesiones (refresh hasheado; multisesión)
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id UUID PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    refresh_token_hash TEXT NOT NULL,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    refresh_expires_at TIMESTAMPTZ NOT NULL,
+    revoked_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_refresh_hash ON user_sessions(refresh_token_hash);
+
+-- Recuperación de contraseña (token hasheado)
+CREATE TABLE IF NOT EXISTS password_resets (
+    id SERIAL PRIMARY KEY,
+    phone VARCHAR(20) NOT NULL,
+    token_hash TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_password_resets_phone_used ON password_resets(phone, used);
+CREATE INDEX IF NOT EXISTS idx_password_resets_expires ON password_resets(expires_at);
+
+-- Recuperación por OTP (sistema separado; no usa password_resets)
+CREATE TABLE IF NOT EXISTS otp_codes (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    phone VARCHAR(20) NOT NULL,
+    code_hash TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_otp_codes_user_id ON otp_codes(user_id);
+CREATE INDEX IF NOT EXISTS idx_otp_codes_expires ON otp_codes(expires_at);
+
+CREATE TABLE IF NOT EXISTS otp_reset_tokens (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_otp_reset_tokens_user_id ON otp_reset_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_otp_reset_tokens_hash_used ON otp_reset_tokens(token_hash, used);

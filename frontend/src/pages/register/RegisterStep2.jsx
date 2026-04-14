@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Check, ArrowLeft, RefreshCcw, Loader2, AlertCircle } from 'lucide-react';
 import { API_URL } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
 
 const RegisterStep2 = ({ onBack, onFinish, userData }) => {
+  const { completeLogin } = useAuth();
   const [captured, setCaptured] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -44,11 +47,13 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
         throw new Error(errorMsg);
       }
 
-      // Guardamos el token para sesión automática
-      localStorage.setItem('token', result.token);
-      localStorage.setItem('user', JSON.stringify(result.user));
-      
-      onFinish(); // Navega al Dashboard/QR
+      completeLogin({
+        accessToken: result.accessToken || result.token,
+        refreshToken: result.refreshToken,
+        user: result.user,
+      });
+
+      onFinish();
       
     } catch (err) {
       console.log("Detalle del error:", err);
@@ -59,9 +64,10 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 flex flex-col">
+    <PageTransition>
+    <main className="min-h-screen bg-white px-6 py-8 flex flex-col">
       <header className="flex items-center mb-8">
-        <button onClick={onBack} disabled={loading} className="p-2 -ml-2 hover:bg-gray-100 rounded-full">
+        <button onClick={onBack} disabled={loading} aria-label="Volver al paso anterior" className="p-2 -ml-2 hover:bg-gray-100 rounded-full">
           <ArrowLeft className="w-6 h-6 text-black" />
         </button>
         <h1 className="ml-4 text-2xl font-bold text-black">Identidad</h1>
@@ -112,6 +118,7 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
             setTimeout(() => { setCaptured(true); setLoading(false); }, 1000);
           }}
           disabled={loading}
+          aria-label={captured ? 'Recapturar foto de perfil' : 'Capturar foto de perfil'}
           className={`mt-10 p-6 rounded-full transition-all outline-none focus:ring-4 shadow-lg active:scale-90
             ${captured ? 'bg-gray-100 text-gray-500' : 'bg-[#0052CC] text-white hover:bg-blue-700 focus:ring-blue-200'}`}
         >
@@ -134,7 +141,8 @@ const RegisterStep2 = ({ onBack, onFinish, userData }) => {
           "FINALIZAR REGISTRO"
         )}
       </button>
-    </div>
+    </main>
+    </PageTransition>
   );
 };
 

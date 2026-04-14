@@ -3,9 +3,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { UserPlus, ShieldCheck, Users, LogOut, AlertCircle, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { mockUsers, USERS_PAGE_SIZE } from '../../data/mockUsers';
 import { ingresosPorHora } from '../../data/mockIngresos';
 import IngresosChart from '../../components/admin/IngresosChart';
+import SkeletonLoader from '../../components/shared/SkeletonLoader';
+import { API_URL } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
+
+const PAGE_SIZE = 5;
 
 // 1. Esquema de validación con Zod (Garantiza calidad de datos en la DB)
 const guardSchema = z.object({
@@ -18,17 +23,15 @@ const guardSchema = z.object({
 });
 
 const AdminDashboard = ({ onLogout }) => {
+  const { user: adminData } = useAuth();
   const [serverMessage, setServerMessage] = useState({ type: '', msg: '' });
-  // Paginación simulada tabla usuarios (10 filas fijas; controles anterior/siguiente)
+  const [users, setUsers] = useState([]);
+  const [usersTotal, setUsersTotal] = useState(0);
   const [usersPage, setUsersPage] = useState(0);
-  const totalUsersPages = Math.max(1, Math.ceil(mockUsers.length / USERS_PAGE_SIZE));
-  const paginatedUsers = mockUsers.slice(
-    usersPage * USERS_PAGE_SIZE,
-    (usersPage + 1) * USERS_PAGE_SIZE
-  );
+  const [usersLoading, setUsersLoading] = useState(true);
+  const totalUsersPages = Math.max(1, Math.ceil(usersTotal / PAGE_SIZE));
   
-  // Recuperamos los datos del Admin logueado desde el LocalStorage
-  const adminData = JSON.parse(localStorage.getItem('user')) || { nombre: 'Admin', zone_id: null };
+  const adminProfile = adminData || { nombre: 'Admin', zone_id: null };
 
   const {
     register,
@@ -45,6 +48,30 @@ const AdminDashboard = ({ onLogout }) => {
     setFocus("nombre");
   }, [setFocus]);
 
+  // Carga de usuarios desde el backend con paginación real
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setUsersLoading(true);
+      try {
+        const token = localStorage.getItem('token');
+        const params = new URLSearchParams({ page: usersPage, limit: PAGE_SIZE });
+        if (adminProfile.zone_id) params.append('zone_id', adminProfile.zone_id);
+        const res = await fetch(`${API_URL}/auth/users?${params}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.msg || 'Error al cargar usuarios');
+        setUsers(data.users);
+        setUsersTotal(data.total);
+      } catch (err) {
+        console.error('Error cargando usuarios:', err);
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+    fetchUsers();
+  }, [usersPage, adminProfile.zone_id]);
+
   // Lógica Asíncrona para registrar el Guardia en la BD
   const onSubmit = async (data) => {
     setServerMessage({ type: '', msg: '' });
@@ -53,11 +80,11 @@ const AdminDashboard = ({ onLogout }) => {
     const payload = {
       ...data,
       role: 'guard',
-      zone_id: adminData.zone_id // El guardia pertenece a la misma zona que el Admin
+      zone_id: adminProfile.zone_id // El guardia pertenece a la misma zona que el Admin
     };
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/register", {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -77,6 +104,7 @@ const AdminDashboard = ({ onLogout }) => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header con información de la Zona */}
       <header className="bg-[#0052CC] text-white p-6 rounded-b-[2.5rem] shadow-xl">
@@ -87,7 +115,7 @@ const AdminDashboard = ({ onLogout }) => {
             </div>
             <div>
               <h1 className="text-xl font-bold leading-none">Panel de Control</h1>
-              <p className="text-blue-100 text-xs mt-1">Admin: {adminData.nombre}</p>
+              <p className="text-blue-100 text-xs mt-1">Admin: {adminProfile.nombre}</p>
             </div>
           </div>
           <button 
@@ -103,7 +131,7 @@ const AdminDashboard = ({ onLogout }) => {
           <p className="text-blue-200 text-[10px] uppercase font-black tracking-widest mb-1">Zona Residencial Activa</p>
           <div className="flex justify-between items-end">
             <p className="text-lg font-bold">Fraccionamiento Bosques</p>
-            <span className="text-[10px] bg-green-400 text-green-900 px-2 py-0.5 rounded-full font-bold">ID: {adminData.zone_id || '0'}</span>
+            <span className="text-[10px] bg-green-400 text-green-900 px-2 py-0.5 rounded-full font-bold">ID: {adminProfile.zone_id || '0'}</span>
           </div>
         </div>
       </header>
@@ -146,9 +174,10 @@ const AdminDashboard = ({ onLogout }) => {
             )}
 
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Nombre Completo</label>
-              <input 
+              <label htmlFor="guard-name" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Nombre Completo</label>
+              <input
                 {...register("nombre")}
+                id="guard-name"
                 placeholder="Nombre del guardia"
                 className={`w-full h-14 px-5 rounded-2xl border-2 transition-all outline-none text-black font-semibold
                   ${errors.nombre ? 'border-red-500 bg-red-50' : 'border-gray-50 focus:border-blue-600 bg-gray-50'}`}
@@ -158,9 +187,10 @@ const AdminDashboard = ({ onLogout }) => {
 
             <div className="grid grid-cols-1 gap-5">
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Teléfono / Usuario</label>
-                <input 
+                <label htmlFor="guard-phone" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Teléfono / Usuario</label>
+                <input
                   {...register("phone")}
+                  id="guard-phone"
                   type="tel"
                   inputMode="numeric"
                   placeholder="10 dígitos"
@@ -171,9 +201,10 @@ const AdminDashboard = ({ onLogout }) => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 ml-1">Contraseña de Acceso</label>
-                <input 
+                <label htmlFor="guard-password" className="block text-xs font-bold text-gray-600 mb-2 ml-1">Contraseña de Acceso</label>
+                <input
                   {...register("password")}
+                  id="guard-password"
                   type="password"
                   placeholder="Mínimo 6 caracteres"
                   className={`w-full h-14 px-5 rounded-2xl border-2 transition-all outline-none text-black font-semibold
@@ -207,32 +238,46 @@ const AdminDashboard = ({ onLogout }) => {
             Usuarios registrados
           </h2>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px] border-collapse text-left">
-              <thead>
-                <tr>
-                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">ID</th>
-                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Nombre</th>
-                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Email</th>
-                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Fecha de registro</th>
-                  <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50/50">
-                    <td className="p-3 text-gray-800 font-medium">{user.id}</td>
-                    <td className="p-3 text-gray-800">{user.nombre}</td>
-                    <td className="p-3 text-gray-600">{user.email}</td>
-                    <td className="p-3 text-gray-600">{user.fechaRegistro}</td>
-                    <td className="p-3">
-                      <span className={user.estado === 'Activo' ? 'text-green-600 font-semibold' : 'text-gray-500'}>
-                        {user.estado}
-                      </span>
-                    </td>
+            {usersLoading ? (
+              <SkeletonLoader variant="table" className="min-w-[600px]" />
+            ) : (
+              <table className="w-full min-w-[600px] border-collapse text-left">
+                <thead>
+                  <tr>
+                    <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">ID</th>
+                    <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Nombre</th>
+                    <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Teléfono</th>
+                    <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Fecha de registro</th>
+                    <th scope="col" className="p-3 bg-gray-50 border-b-2 border-gray-200 text-gray-600 text-xs font-bold uppercase">Rol</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {users.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-6 text-center text-gray-400 text-sm">Sin usuarios registrados</td>
+                    </tr>
+                  ) : (
+                    users.map((user) => (
+                      <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50/50">
+                        <td className="p-3 text-gray-800 font-medium">{user.id}</td>
+                        <td className="p-3 text-gray-800">{user.nombre}</td>
+                        <td className="p-3 text-gray-600">{user.telefono}</td>
+                        <td className="p-3 text-gray-600">{new Date(user.created_at).toLocaleDateString('es-MX')}</td>
+                        <td className="p-3">
+                          <span className={
+                            user.role === 'admin' ? 'text-blue-600 font-semibold' :
+                            user.role === 'guard' ? 'text-yellow-600 font-semibold' :
+                            'text-green-600 font-semibold'
+                          }>
+                            {user.role}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
           {/* Controles de paginación: accesibles por teclado (Tab, Enter/Espacio), foco visible */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
@@ -266,6 +311,7 @@ const AdminDashboard = ({ onLogout }) => {
         <IngresosChart data={ingresosPorHora} title="Ingresos por hora (simulado)" />
       </main>
     </div>
+    </PageTransition>
   );
 };
 

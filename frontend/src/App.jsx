@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 
 // Importaciones de Pantallas
@@ -12,6 +12,13 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import Error404 from './pages/errors/Error404';
 import DecisionAcceso from './pages/acceso/DecisionAcceso';
 import Navbar from './components/shared/Navbar';
+import RecoverPasswordScreen from './pages/auth/RecoverPasswordScreen';
+import ResetPasswordScreen from './pages/auth/ResetPasswordScreen';
+import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/shared/ErrorBoundary';
+import Error500 from './pages/errors/Error500';
+import ErrorOffline from './pages/errors/ErrorOffline';
+import PWAInstallPrompt from './components/shared/PWAInstallPrompt';
 
 // COMPONENTE GUARDÍAN: Control de acceso por roles
 const ProtectedRoute = ({ children, allowedRoles }) => {
@@ -26,6 +33,15 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 function AppContent() {
   const navigate = useNavigate();
+
+  // Redirigir a /offline si no hay conexión al montar o al perderla
+  useEffect(() => {
+    if (!navigator.onLine) navigate('/offline');
+
+    const handleOffline = () => navigate('/offline');
+    window.addEventListener('offline', handleOffline);
+    return () => window.removeEventListener('offline', handleOffline);
+  }, [navigate]);
 
   const [userData, setUserData] = useState({
     nombre: '',
@@ -103,6 +119,14 @@ function AppContent() {
         </ProtectedRoute>
       } />
 
+      {/* Recuperación de contraseña (no protegido) */}
+      <Route path="/recover-password" element={<RecoverPasswordScreen />} />
+      <Route path="/reset-password" element={<ResetPasswordScreen />} />
+
+      {/* Pantallas de error */}
+      <Route path="/500" element={<Error500 />} />
+      <Route path="/offline" element={<ErrorOffline />} />
+
       <Route path="*" element={<Error404 />} />
     </Routes>
   );
@@ -111,10 +135,15 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#1A1A1A]">
-        <Navbar />
-        <AppContent />
-      </div>
+      <AuthProvider>
+        <ErrorBoundary>
+          <div className="min-h-screen bg-[#1A1A1A]">
+            <Navbar />
+            <AppContent />
+            <PWAInstallPrompt />
+          </div>
+        </ErrorBoundary>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

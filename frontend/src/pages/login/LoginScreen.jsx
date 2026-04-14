@@ -5,6 +5,8 @@ import * as z from 'zod';
 import { Shield, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../api/auth';
+import { useAuth } from '../../context/AuthContext';
+import PageTransition from '../../components/shared/PageTransition';
 
 const loginSchema = z.object({
   phone: z.string()
@@ -16,6 +18,7 @@ const loginSchema = z.object({
 
 const LoginScreen = ({ onNavigateToRegister }) => {
   const navigate = useNavigate();
+  const { completeLogin } = useAuth();
   const [serverError, setServerError] = useState(null);
   
   const {
@@ -35,8 +38,11 @@ const LoginScreen = ({ onNavigateToRegister }) => {
     setServerError(null);
     try {
       const result = await loginUser(data);
-      localStorage.setItem('token', result.token);
-      localStorage.setItem('user', JSON.stringify(result.user));
+      completeLogin({
+        accessToken: result.accessToken || result.token,
+        refreshToken: result.refreshToken,
+        user: result.user,
+      });
 
       if (result.user.role === 'admin') {
         navigate('/admin/dashboard');
@@ -51,7 +57,8 @@ const LoginScreen = ({ onNavigateToRegister }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
+    <PageTransition>
+    <main className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
       <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-2xl">
         {/* CABECERA RESTAURADA */}
         <div className="flex flex-col items-center mb-8">
@@ -78,7 +85,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
               id="phone"
               type="tel"
               placeholder="10 dígitos"
-              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC]'}`}
+              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.phone ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC] focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-1'}`}
             />
             {errors.phone && <p className="text-red-600 text-xs font-medium">{errors.phone.message}</p>}
           </div>
@@ -89,7 +96,7 @@ const LoginScreen = ({ onNavigateToRegister }) => {
               {...register("password")}
               id="password"
               type="password"
-              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.password ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC]'}`}
+              className={`w-full h-12 px-4 rounded-lg border-2 outline-none text-black ${errors.password ? 'border-red-500 bg-red-50' : 'border-gray-100 bg-gray-50 focus:border-[#0052CC] focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-1'}`}
             />
             {errors.password && <p className="text-red-600 text-xs font-medium">{errors.password.message}</p>}
           </div>
@@ -106,9 +113,20 @@ const LoginScreen = ({ onNavigateToRegister }) => {
             <span className="text-gray-500 text-sm">¿No tienes cuenta? </span>
             <button type="button" onClick={onNavigateToRegister} className="text-[#0052CC] text-sm font-bold hover:underline">Registro</button>
           </div>
+
+          <div className="text-center mt-3">
+            <button
+              type="button"
+              onClick={() => navigate('/recover-password')}
+              className="text-[#0052CC] text-sm font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052CC] focus-visible:ring-offset-2"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
         </form>
       </div>
-    </div>
+    </main>
+    </PageTransition>
   );
 };
 

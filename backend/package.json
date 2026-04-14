@@ -5,7 +5,9 @@
   "scripts": {
     "start": "npx sequelize-cli db:migrate && node server.js",
     "dev": "nodemon index.js",
-    "test": "echo \"No hay tests\" && exit 0"
+    "migrate": "node scripts/apply-migrations.js",
+    "migrate:sessions": "node scripts/apply-session-migration.js",
+    "test": "jest --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +24,8 @@
     "pg": "^8.18.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.0.0"
   }
 }
