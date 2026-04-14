@@ -24,3 +24,9 @@ yarn-error.log*
 
 # Coverage testing
 coverage/
+
+# PWA dev artifacts
+frontend/dev-dist/
+
+# Claude Code local settings
+.claude/settings.local.json
