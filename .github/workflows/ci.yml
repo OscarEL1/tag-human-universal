@@ -1,7 +1,6 @@
 name: CI Pipeline - Tag Human Universal
 
 # 1. DISPARADORES (TRIGGERS)
-# Se activa en Pull Requests y Pushes a las ramas clave
 on:
   push:
     branches: [ "main", "develop" ]
@@ -12,32 +11,43 @@ jobs:
   validate-and-build:
     name: Validación Integral
     runs-on: ubuntu-latest
-    
+
+    # Variables de entorno mínimas para que docker compose config y build pasen
+    env:
+      DB_USER: postgres
+      DB_PASSWORD: ci_password
+      DB_NAME: taghuman
+      DB_PORT: 5432
+      DB_SSL: false
+      PORT: 3000
+      JWT_SECRET: ci_secret_only_for_build
+      ACCESS_TOKEN_EXPIRES: 15m
+      REFRESH_TOKEN_DAYS: 7
+      NODE_ENV: production
+      VITE_API_URL: http://localhost:3000/api
+
     steps:
       # Descargar el código
       - name: Checkout del Código
         uses: actions/checkout@v4
 
-      # Configurar Node (mejorada con Caché)
-      # Esto hace que las descargas de npm sean ultra rápidas
+      # Configurar Node con caché para instalaciones más rápidas
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          #cache: 'npm'
-          #cache-dependency-path: '**/package-lock.json'
-          # Se comentaron estas las líneas de caché temporalmente para que no marque error
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
 
-      # Verificar Dependencias 
-      # Si alguien subió un package.json roto, fallamos aquí rápido
-      - name: Instalar Dependencias (Test Rápido)
+      # Verificar dependencias
+      - name: Instalar Dependencias
         run: |
           echo "Verificando Backend..."
           cd backend && npm install --ignore-scripts
           echo "Verificando Frontend..."
           cd ../frontend && npm install --ignore-scripts
 
-      # Ejecutar Linter para asegurar calidad del código
+      # Linter
       - name: Validar Calidad de Código (Linter)
         run: |
           echo "Ejecutando Linter en Backend..."
@@ -45,12 +55,10 @@ jobs:
           echo "Ejecutando Linter en Frontend..."
           cd ../frontend && npm run lint
 
-      # Validar Sintaxis de Docker Compose 
-      # Verifica que no falten espacios o letras en el YAML
+      # Validar sintaxis de docker-compose
       - name: Validar Syntax Docker Compose
         run: docker compose config
 
-      # Construcción Real de Contenedores
-      # La prueba de fuego: ¿Se pueden crear los contenedores?
+      # Construir imágenes Docker
       - name: Build Docker Images
         run: docker compose build

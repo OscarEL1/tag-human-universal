@@ -14,39 +14,48 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-  # Backend (Node API)
+  # Backend (Node API — hot reload con nodemon)
   backend:
     build: ./backend
     container_name: taghuman_backend
+    command: npm run dev
     ports:
       - "3000:3000"
     environment:
-      - PORT=${PORT}
-      - DB_PORT=${DB_PORT}
+      - PORT=${PORT:-3000}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_HOST=db
       - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+      - DB_SSL=${DB_SSL:-false}
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_change_in_production}
+      - ACCESS_TOKEN_EXPIRES=${ACCESS_TOKEN_EXPIRES:-15m}
+      - REFRESH_TOKEN_DAYS=${REFRESH_TOKEN_DAYS:-7}
+      - NODE_ENV=development
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./backend:/app
       - /app/node_modules
 
-  # Frontend (React Vite)
+  # Frontend (React Vite — dev server con hot reload)
   frontend:
     build: ./frontend
     container_name: taghuman_frontend
     ports:
-      - "5173:5173"
+      - "8080:80"
     environment:
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
 
 volumes:
   pgdata:

@@ -11,6 +11,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build: ./backend
@@ -18,17 +23,20 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - PORT=${PORT}
-      - DB_PORT=${DB_PORT}
+      - PORT=${PORT:-3000}
+      - DB_PORT=${DB_PORT:-5432}
       - DB_HOST=db
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_PASS=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
+      - DB_SSL=${DB_SSL:-false}
       - JWT_SECRET=${JWT_SECRET}
+      - ACCESS_TOKEN_EXPIRES=${ACCESS_TOKEN_EXPIRES:-15m}
+      - REFRESH_TOKEN_DAYS=${REFRESH_TOKEN_DAYS:-7}
       - NODE_ENV=${NODE_ENV:-production}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -37,12 +45,10 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: http://localhost:3000/api
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000/api}
     container_name: taghuman_frontend
     ports:
       - "8080:80"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
 
