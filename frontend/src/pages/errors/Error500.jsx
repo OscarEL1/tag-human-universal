@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import PageTransition from '../../components/shared/PageTransition';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,12 +7,6 @@ export default function Error500({ error }) {
 
   return (
     <PageTransition>
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-      <h1 className="text-6xl font-bold text-red-600 mb-4">500</h1>
-      <h2 className="text-2xl font-semibold mb-2">Error de Servidor</h2>
-      <p className="text-gray-600 mb-8" aria-live="assertive">
-        Hubo un problema técnico en nuestro sistema. No te preocupes, tus datos están a salvo. Por favor, intenta recargar la página o vuelve más tarde.
-
     <div style={{
       minHeight: '100vh',
       backgroundColor: '#1A1A1A',

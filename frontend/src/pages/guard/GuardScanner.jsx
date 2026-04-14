@@ -35,7 +35,7 @@ const GuardScanner = ({ onScanResult }) => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-gray-50 px-6 py-8 flex flex-col">
+    <main className="min-h-screen bg-gray-50 px-6 py-8 flex flex-col">
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-black leading-none">Escáner</h1>
@@ -50,6 +50,8 @@ const GuardScanner = ({ onScanResult }) => {
       <div className="grid grid-cols-2 gap-4 mb-8" role="radiogroup" aria-label="Modo de escaneo">
         <button
           onClick={() => setMode('entry')}
+          role="radio"
+          aria-checked={mode === 'entry'}
           className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'entry' ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200' : 'bg-white border-gray-100 text-gray-400'
             }`}
         >
@@ -58,6 +60,8 @@ const GuardScanner = ({ onScanResult }) => {
         </button>
         <button
           onClick={() => setMode('exit')}
+          role="radio"
+          aria-checked={mode === 'exit'}
           className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'exit' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-gray-100 text-gray-400'
             }`}
         >
@@ -116,7 +120,7 @@ const GuardScanner = ({ onScanResult }) => {
           animation: scan-line 1.5s infinite alternate ease-in-out;
         }
       `}</style>
-    </div>
+    </main>
     </PageTransition>
   );
 };
