@@ -1,36 +1,66 @@
 import React, { useState } from 'react';
-import { Camera, LogIn, LogOut, Loader2, ShieldCheck } from 'lucide-react';
+import { Camera, LogIn, LogOut, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import PageTransition from '../../components/shared/PageTransition';
+import QrScanner from '../../components/shared/QrScanner';
 
 const GuardScanner = ({ onScanResult }) => {
   const { user: guardData } = useAuth();
   const [mode, setMode] = useState('entry');
   const [isScanning, setIsScanning] = useState(false);
   const [scanFlash, setScanFlash] = useState(null); // null | 'success' | 'error'
+  const [scanError, setScanError] = useState(null);
 
   const guardProfile = guardData || { nombre: 'Guardia' };
 
-  const simulateScan = () => {
-    setIsScanning(true);
+  const handleScanSuccess = (decodedText) => {
+    setScanError(null);
+    let parsed;
 
-    setTimeout(() => {
+    try {
+      parsed = JSON.parse(decodedText);
+    } catch {
+      triggerFlash('error');
+      setScanError('Código QR no válido');
       setIsScanning(false);
+      return;
+    }
 
-      // Flash visual de éxito + vibración corta
-      setScanFlash('success');
-      if ('vibrate' in navigator) navigator.vibrate(200);
-      setTimeout(() => setScanFlash(null), 600);
+    if (
+      typeof parsed.id === 'undefined' ||
+      typeof parsed.plates === 'undefined'
+    ) {
+      triggerFlash('error');
+      setScanError('Código QR no válido');
+      setIsScanning(false);
+      return;
+    }
 
-      // En un caso real, aquí usaríamos una librería como 'html5-qrcode'
-      // para decodificar el valor del QR del conductor.
-      onScanResult({
-        plate: '93TLY5',
-        name: 'Conductor Registrado',
-        mode: mode,
-        guardId: guardData?.id ?? null,
-      });
-    }, 2000);
+    triggerFlash('success');
+    if ('vibrate' in navigator) navigator.vibrate(200);
+    setIsScanning(false);
+
+    onScanResult({
+      plate: parsed.plates,
+      driverId: parsed.id,
+      name: 'Conductor Registrado',
+      mode,
+      guardId: guardData?.id ?? null,
+    });
+  };
+
+  const handleScanError = (msg) => {
+    setScanError(msg);
+  };
+
+  const triggerFlash = (type) => {
+    setScanFlash(type);
+    setTimeout(() => setScanFlash(null), 600);
+  };
+
+  const handleToggleScanning = () => {
+    setScanError(null);
+    setIsScanning((prev) => !prev);
   };
 
   return (
@@ -46,14 +76,17 @@ const GuardScanner = ({ onScanResult }) => {
         </div>
       </header>
 
-      {/* Selector de Modo (Accesibilidad 9 puntos) */}
+      {/* Selector de Modo */}
       <div className="grid grid-cols-2 gap-4 mb-8" role="radiogroup" aria-label="Modo de escaneo">
         <button
           onClick={() => setMode('entry')}
           role="radio"
           aria-checked={mode === 'entry'}
-          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'entry' ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200' : 'bg-white border-gray-100 text-gray-400'
-            }`}
+          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${
+            mode === 'entry'
+              ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-200'
+              : 'bg-white border-gray-100 text-gray-400'
+          }`}
         >
           <LogIn className="w-6 h-6" />
           <span className="text-[10px] uppercase tracking-widest">Entrada</span>
@@ -62,64 +95,61 @@ const GuardScanner = ({ onScanResult }) => {
           onClick={() => setMode('exit')}
           role="radio"
           aria-checked={mode === 'exit'}
-          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${mode === 'exit' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-white border-gray-100 text-gray-400'
-            }`}
+          className={`h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 font-bold transition-all outline-none ${
+            mode === 'exit'
+              ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200'
+              : 'bg-white border-gray-100 text-gray-400'
+          }`}
         >
           <LogOut className="w-6 h-6" />
           <span className="text-[10px] uppercase tracking-widest">Salida</span>
         </button>
       </div>
 
-      {/* Visor del Escáner */}
-      <div className="flex-1 flex flex-col items-center justify-center bg-[#1A1A1A] rounded-[2.5rem] relative overflow-hidden shadow-2xl border-8 border-white">
+      {/* Visor */}
+      <div className="flex-1 flex flex-col items-center justify-center relative">
         {isScanning ? (
-          <div className="flex flex-col items-center gap-4">
-            <div className="relative">
-              <Loader2 className="w-16 h-16 text-blue-500 animate-spin" />
-              <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
-            </div>
-            <p className="text-white font-black text-xs tracking-widest uppercase animate-pulse">Leyendo QR...</p>
+          /* Cámara real activa */
+          <div className="w-full relative">
+            <QrScanner
+              isScanning={isScanning}
+              onScanSuccess={handleScanSuccess}
+              onScanError={handleScanError}
+            />
+            {/* Flash de resultado superpuesto */}
+            {scanFlash && (
+              <div
+                aria-hidden="true"
+                className={`absolute inset-0 rounded-xl pointer-events-none transition-opacity duration-300 ${
+                  scanFlash === 'success' ? 'bg-green-500 opacity-40' : 'bg-red-500 opacity-40'
+                }`}
+              />
+            )}
           </div>
         ) : (
-          <>
-            <div className="absolute inset-0 border-[2px] border-white/10 m-12 rounded-3xl border-dashed"></div>
+          /* Placeholder cuando la cámara está apagada */
+          <div className="w-full flex flex-col items-center justify-center bg-[#1A1A1A] rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white" style={{ aspectRatio: '1 / 1' }}>
+            <div className="absolute inset-0 border-[2px] border-white/10 m-12 rounded-3xl border-dashed pointer-events-none" />
             <Camera className="w-20 h-20 text-white opacity-10" />
-          </>
-        )}
-
-        {/* Línea de escaneo láser (Efecto visual) */}
-        {isScanning && (
-          <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-scan-line"></div>
-        )}
-
-        {/* Flash de resultado: verde=éxito, rojo=error */}
-        {scanFlash && (
-          <div
-            aria-hidden="true"
-            className={`absolute inset-0 rounded-[2rem] pointer-events-none transition-opacity duration-300 ${
-              scanFlash === 'success' ? 'bg-green-500 opacity-40' : 'bg-red-500 opacity-40'
-            }`}
-          />
+          </div>
         )}
       </div>
 
-      <button
-        onClick={simulateScan}
-        disabled={isScanning}
-        className="mt-8 w-full h-16 bg-black text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all disabled:bg-gray-300"
-      >
-        {isScanning ? "PROCESANDO..." : "ESCANEAR CÓDIGO"}
-      </button>
+      {/* Mensaje de error de QR */}
+      {scanError && !isScanning && (
+        <p className="mt-4 text-center text-red-500 text-sm font-bold" role="alert">
+          {scanError}
+        </p>
+      )}
 
-      <style jsx>{`
-        @keyframes scan-line {
-          0% { top: 20%; }
-          100% { top: 80%; }
-        }
-        .animate-scan-line {
-          animation: scan-line 1.5s infinite alternate ease-in-out;
-        }
-      `}</style>
+      <button
+        onClick={handleToggleScanning}
+        className={`mt-8 w-full h-16 font-black rounded-2xl shadow-xl active:scale-95 transition-all text-white ${
+          isScanning ? 'bg-red-600 hover:bg-red-700' : 'bg-black hover:bg-gray-900'
+        }`}
+      >
+        {isScanning ? 'DETENER CÁMARA' : 'ESCANEAR CÓDIGO'}
+      </button>
     </main>
     </PageTransition>
   );
