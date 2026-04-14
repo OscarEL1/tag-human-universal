@@ -4,38 +4,41 @@ import { QRCodeSVG } from 'qrcode.react'; // Asegúrate de instalarlo: npm insta
 import { useAuth } from '../../context/AuthContext';
 import PageTransition from '../../components/shared/PageTransition';
 
+const generateQrData = (id, plates) => JSON.stringify({
+  id,
+  plates,
+  timestamp: Date.now(),
+});
+
 const DriverDashboard = ({ onLogout }) => {
   const { user: authUser } = useAuth();
-  const [timeLeft, setTimeLeft] = useState(30);
   const logoutBtnRef = useRef(null);
 
   const user = authUser
     ? { ...authUser, plates: authUser.plates || 'S/N' }
     : { nombre: 'Conductor', plates: 'S/N', id: null };
 
+  // QR generado al montar; se regenera solo al expirar cada 30s
+  const [qrValue, setQrValue] = useState(() => generateQrData(user.id, user.plates));
+  const [timeLeft, setTimeLeft] = useState(30);
+
   useEffect(() => {
     logoutBtnRef.current?.focus();
   }, []);
 
-  // Agregamos un estado para el timestamp y evitar la función impura en el renderizado
-  const [timestamp, setTimestamp] = useState(() => Date.now());
-
-  // 2. LÓGICA DE QR DINÁMICO (Seguridad)
+  // Countdown de 1s: regenera el QR únicamente cuando llega a 0
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft((prev) => (prev <= 1 ? 30 : prev - 1));
-      setTimestamp(Date.now()); // Se actualiza el timestamp de forma pura en el ciclo
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setQrValue(generateQrData(user.id, user.plates));
+          return 30;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  // 3. GENERACIÓN DE CONTENIDO PARA EL QR
-  // Usamos el timestamp del estado de React, no la llamada directa a la función
-  const qrValue = JSON.stringify({
-    id: user.id,
-    plates: user.plates,
-    timestamp: timestamp
-  });
+  }, [user.id, user.plates]);
 
   return (
     <PageTransition>
