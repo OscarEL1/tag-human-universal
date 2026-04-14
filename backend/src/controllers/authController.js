@@ -91,4 +91,53 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const getUsers = async (req, res) => {
+  const { zone_id, page = 0, limit = 5 } = req.query;
+  const pageNum = Math.max(0, parseInt(page, 10) || 0);
+  const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 5));
+  const offset = pageNum * limitNum;
+
+  try {
+    let usersQuery, usersParams, countQuery, countParams;
+
+    if (zone_id) {
+      usersQuery = `
+        SELECT id, nombre, phone AS telefono, role, created_at, zone_id
+        FROM users
+        WHERE zone_id = $1
+        ORDER BY created_at DESC
+        LIMIT $2 OFFSET $3
+      `;
+      usersParams = [zone_id, limitNum, offset];
+      countQuery = 'SELECT COUNT(*) FROM users WHERE zone_id = $1';
+      countParams = [zone_id];
+    } else {
+      usersQuery = `
+        SELECT id, nombre, phone AS telefono, role, created_at, zone_id
+        FROM users
+        ORDER BY created_at DESC
+        LIMIT $1 OFFSET $2
+      `;
+      usersParams = [limitNum, offset];
+      countQuery = 'SELECT COUNT(*) FROM users';
+      countParams = [];
+    }
+
+    const [usersResult, countResult] = await Promise.all([
+      pool.query(usersQuery, usersParams),
+      pool.query(countQuery, countParams),
+    ]);
+
+    res.json({
+      users: usersResult.rows,
+      total: parseInt(countResult.rows[0].count, 10),
+      page: pageNum,
+      limit: limitNum,
+    });
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ msg: 'Error interno del servidor' });
+  }
+};
+
+module.exports = { register, login, getUsers };
