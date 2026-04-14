@@ -1,22 +1,52 @@
-import React, { useCallback } from 'react';
+import React, { useState } from 'react';
 import { Button } from '../../components/ui/Button';
-import { User } from 'lucide-react';
+import { User, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { API_URL } from '../../api/auth';
 import PageTransition from '../../components/shared/PageTransition';
 
 /**
  * Pantalla "Decisión de Acceso"
  * Muestra foto del repartidor (placeholder), placas del vehículo y botón Autorizar.
- * Accesible: semántica, foco visible (Button ya usa focus-visible), etiquetas ARIA donde aplica.
+ * Wired to POST /api/auditoria/registrar — requiere auth token en localStorage.
  */
 const DecisionAcceso = () => {
-  const handleAutorizar = useCallback(() => {
-    // Funcional: mensaje en consola y feedback visual opcional (toast)
-    console.log('[Decisión de Acceso] Autorizar pulsado');
-    // Opción: podrías integrar un toast aquí si el proyecto lo tuviera
-    if (typeof window !== 'undefined' && window.__toast) {
-      window.__toast('Acceso autorizado');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null); // { type: 'success' | 'error', msg: string }
+
+  // En la integración real, estos valores llegarían por props/route desde GuardScanner
+  const plate = 'ABC-1234';
+  const destino = 'N/A';
+
+  const handleAutorizar = async () => {
+    setLoading(true);
+    setResult(null);
+    try {
+      const token = localStorage.getItem('token');
+      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+      const res = await fetch(`${API_URL}/auditoria/registrar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          quien_entra: plate,
+          quien_autoriza: currentUser.id ?? null,
+          destino,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.msg || 'Error al registrar el acceso');
+
+      setResult({ type: 'success', msg: 'Acceso autorizado y registrado correctamente' });
+    } catch (err) {
+      setResult({ type: 'error', msg: err.message });
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
 
   return (
     <PageTransition>
@@ -43,21 +73,41 @@ const DecisionAcceso = () => {
           <p id="label-placas" className="text-gray-400 text-xs uppercase font-bold mb-1">
             Placas del vehículo
           </p>
-          <p className="text-2xl font-black tracking-widest font-mono" aria-label="Placas ABC-1234">
-            ABC-1234
+          <p className="text-2xl font-black tracking-widest font-mono" aria-label={`Placas ${plate}`}>
+            {plate}
           </p>
         </section>
 
-        {/* Botón Autorizar: accesible por teclado (Tab + Enter/Espacio), focus-visible en Button */}
+        {/* Feedback del servidor */}
+        {result && (
+          <div
+            className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-in fade-in duration-300 ${
+              result.type === 'success'
+                ? 'bg-green-900/40 border border-green-700 text-green-300'
+                : 'bg-red-900/40 border border-red-700 text-red-300'
+            }`}
+            role="alert"
+          >
+            {result.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+            <p className="text-sm font-bold">{result.msg}</p>
+          </div>
+        )}
+
+        {/* Botón Autorizar */}
         <Button
           type="button"
           onClick={handleAutorizar}
+          disabled={loading || result?.type === 'success'}
           variant="default"
           size="lg"
-          className="w-full bg-[var(--action-blue)] hover:opacity-90 focus-visible:ring-3 focus-visible:ring-blue-300"
+          className="w-full bg-[var(--action-blue)] hover:opacity-90 focus-visible:ring-3 focus-visible:ring-blue-300 disabled:opacity-50 flex items-center justify-center gap-2"
           aria-label="Autorizar acceso del repartidor"
         >
-          Autorizar
+          {loading ? (
+            <><Loader2 className="animate-spin w-5 h-5" aria-hidden="true" /><span aria-live="assertive">Registrando...</span></>
+          ) : (
+            'Autorizar'
+          )}
         </Button>
       </main>
     </div>
