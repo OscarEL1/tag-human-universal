@@ -27,8 +27,6 @@ const AdminDashboard = ({ onLogout }) => {
   const [serverMessage, setServerMessage] = useState({ type: '', msg: '' });
   const [users, setUsers] = useState([]);
   const [usersTotal, setUsersTotal] = useState(0);
-  const [tableLoading, setTableLoading] = useState(true);
-  // Paginación simulada tabla usuarios (10 filas fijas; controles anterior/siguiente)
   const [usersPage, setUsersPage] = useState(0);
   const [usersLoading, setUsersLoading] = useState(true);
   const totalUsersPages = Math.max(1, Math.ceil(usersTotal / PAGE_SIZE));
@@ -44,12 +42,6 @@ const AdminDashboard = ({ onLogout }) => {
   } = useForm({
     resolver: zodResolver(guardSchema)
   });
-
-  // Simula carga inicial de la tabla (datos reales llegarían aquí de un fetch)
-  useEffect(() => {
-    const t = setTimeout(() => setTableLoading(false), 800);
-    return () => clearTimeout(t);
-  }, []);
 
   // Gestión de Foco: Event-driven UI para agilizar el registro
   useEffect(() => {

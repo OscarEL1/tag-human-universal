@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Button } from '../../components/ui/Button';
-import React, { useState } from 'react';
-import { Button } from '../../components/ui/Button';
 import { User, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { API_URL } from '../../api/auth';
 import PageTransition from '../../components/shared/PageTransition';
