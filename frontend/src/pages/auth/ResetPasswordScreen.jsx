@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { resetPassword } from '../../services/authService';
+import PageTransition from '../../components/shared/PageTransition';
 
 function sanitizePhoneInput(value) {
   return value.replace(/\D/g, '').slice(0, 10);
@@ -70,6 +71,7 @@ export default function ResetPasswordScreen() {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen flex items-center justify-center p-6 bg-[#1A1A1A]">
       <div className="w-full max-w-md bg-white rounded-2xl p-8 shadow-2xl">
         <button
@@ -166,5 +168,6 @@ export default function ResetPasswordScreen() {
         </form>
       </div>
     </div>
+    </PageTransition>
   );
 }
